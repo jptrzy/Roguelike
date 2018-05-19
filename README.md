@@ -21,7 +21,6 @@ My YouTube channel where I sometimes showcase features of the game: https://www.
 ## Currently working on:
 
 * Map generation using the OpenSimplex noise library
-* Reworking tiles and game layer system
 * Inventory and items
 
 ## Acknowledgments:
