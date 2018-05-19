@@ -25,8 +25,13 @@ class pathfinder(object):
 
 		# scan coord with lowest cost
 		while True:
-			lowest_cost = self.scanned[self.scanned.keys()[0]].cost
-			lowest_cost_cord = self.scanned[self.scanned.keys()[0]]
+			try:
+				lowest_cost = self.scanned[self.scanned.keys()[0]].cost
+				lowest_cost_cord = self.scanned[self.scanned.keys()[0]]
+			except IndexError:
+				# unable to find any path
+				return False
+
 			for coord in self.scanned.values():
 				if coord.cost < lowest_cost:
 					lowest_cost = coord.cost
