@@ -138,10 +138,11 @@ class living(object):
 		return -(float(self.detect_glow_str)/self.detect_glow_range)*distance_from_mob + self.detect_glow_str
 
 class mob(living):
-	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, emit=False, pathfinding=True):
+	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, determined, emit=False, pathfinding=True):
 		living.__init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, emit)
 		self.hostile = hostile
 		self.sense = sense
+		self.determined = determined # max number of checks in pathfinding
 		self.pathfinding = pathfinding
 		self.can_move = True
 
@@ -192,7 +193,7 @@ class mob(living):
 					return
 				else:	
 					if self.pathfinding:
-						self.path = a_star.pathfind.find_path((self.y, self.x), (game.me.y, game.me.x), game.world)
+						self.path = a_star.pathfind.find_path((self.y, self.x), (game.me.y, game.me.x), game.world, self.determined)
 						if self.path:
 							self.action_args = (self, self.path[1][0], self.path[1][1]) # replace y, x
 							action.a_Walk.prep(self, game.timer.time)
@@ -253,11 +254,11 @@ class mob(living):
 		self.mob_group.update(game)
 
 class mob_maker(mob):
-	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, emit=False, pathfinding=True):
-		mob.__init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, emit, pathfinding)
+	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, determined, emit=False, pathfinding=True):
+		mob.__init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, determined, emit, pathfinding)
 
 	def create(self, y, x, worldmap, FOV, mob_group, time):
-		new_mob = mob(self.name, self.tile, self.health.max, self.speed.max, self.sight_range.max, self.stamina.max, self.hunger.max, self.thirst.max, self.mana.max, self.hostile, self.sense, self.emit, self.pathfinding)
+		new_mob = mob(self.name, self.tile, self.health.max, self.speed.max, self.sight_range.max, self.stamina.max, self.hunger.max, self.thirst.max, self.mana.max, self.hostile, self.sense, self.determined, self.emit, self.pathfinding)
 		new_mob.mob_spawn(y, x, worldmap, FOV, mob_group, time)
 		return new_mob
 
@@ -336,16 +337,16 @@ class mob_group(object):
 
 #name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, emit=False, pathfinding=True
 test_mob_tile = tiles.tile(u'T', [255,99,71], False, False, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus varius pharetra finibus. Fusce ac vehicula massa, eu dapibus leo. Praesent viverra, urna vitae tempus mattis, nisi felis venenatis ligula, ac tempus eros mi at orci. Aenean luctus auctor erat, non ornare elit mattis quis. Quisque eget mi in ligula consequat mattis. Sed tempor faucibus risus vitae ultricies. Integer at mauris ex. Praesent in nisl orci. Vivamus in placerat risus, vitae elementum neque. Nunc porta sapien sit amet orci efficitur, feugiat luctus felis vestibulum. Morbi viverra ante sed lectus imperdiet, at ornare ipsum mattis. Ut metus sapien, convallis eu porta et, volutpat a tellus. Suspendisse justo tortor, interdum quis elit eget, dictum consectetur felis. Ut vestibulum ultricies tortor. Nunc vitae neque bibendum, dignissim nulla egestas, consequat orci.', world_layer = 'mobs')
-test_mob = mob_maker(name='a test mob', tile=test_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10)
+test_mob = mob_maker(name='a test mob', tile=test_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, determined=300)
 
 test_light_mob_tile = tiles.light_tile(u'L', [0,0,0], False, False, 'a test light mob', True, 3, [249, 173, 34], 500, 0.5, world_layer='mobs')
-test_light_mob = mob_maker(name='testlightmob1', tile=test_light_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, emit=True)
+test_light_mob = mob_maker(name='testlightmob1', tile=test_light_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, determined=300, emit=True)
 
 test_speed_mob_tile = tiles.tile(u'ጿ', [142, 185, 255], False, False, 'a test speed mob', world_layer='mobs')
-test_speed_mob = mob_maker(name='test speed mob', tile=test_speed_mob_tile, health=100, speed=200, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10)
+test_speed_mob = mob_maker(name='test speed mob', tile=test_speed_mob_tile, health=100, speed=200, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, determined=300)
 
 blind_mob_tile = tiles.tile('B', [142, 185, 255], False, False, 'a blind mob', world_layer = 'mobs')
-test_blind_mob = mob_maker(name='blind test mob', tile=blind_mob_tile, health=100, speed=50, sight_range=3, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=5)
+test_blind_mob = mob_maker(name='blind test mob', tile=blind_mob_tile, health=100, speed=50, sight_range=3, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=5, determined=100)
 
 determined_mob_tile = tiles.tile("D", [255, 0, 0], False, False, 'a determined mob', world_layer = 'mobs')
-test_determined_mob = mob_maker(name='determined mob', tile=determined_mob_tile, health=100,speed=50,sight_range=100,stamina=100,hunger=100,thirst=100,mana=100,hostile=True,sense=100)
+test_determined_mob = mob_maker(name='determined mob', tile=determined_mob_tile, health=100,speed=100,sight_range=100,stamina=100,hunger=100,thirst=100,mana=100,hostile=True,sense=100, determined=10000)
