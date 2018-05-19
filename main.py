@@ -5,8 +5,11 @@ from gamehandler import *
 from mainmenu import *
 from bearlibterminal import terminal
 from windowmod import *
+import os
 
 if __name__ == '__main__':
+	os.chdir('.')
+	
 	Preferences = preferences()
 	Preferences.load()
 

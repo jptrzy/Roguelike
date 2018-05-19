@@ -68,7 +68,13 @@ class main_menu(object):
 					terminal.refresh()
 
 			# process user choice
-			saves = os.listdir('.\saves') # list of all save filenames
+
+			# list of all save filenames with most recent first
+			os.chdir('.\saves')
+			saves = filter(os.path.isfile, os.listdir('.'))
+			saves.sort(key=lambda x: os.path.getmtime(x))
+			saves = saves[::-1]
+			os.chdir('..')
 			
 			if self.choices[self.choice] == new_game_option:
 				prompt_new_save_name = text_input_popup("Enter a file name: ", preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
