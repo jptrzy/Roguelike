@@ -143,6 +143,7 @@ class worldmap(object):
 		self.layers.add_layer('terrain', max_objects=1)
 		self.layers.add_layer('constructs', max_objects=1)
 		self.layers.add_layer('mobs', max_objects=1)
+		self.layers.add_layer('test multi layer', max_objects=10)
 
 
 		self.seethrough = set([])        #sight block map

@@ -137,9 +137,21 @@ class info_panel(object):
 
 	def prepare_tile_info(self, y, x, worldmap):
 		tiles = worldmap.layers.get_tiles(y, x)
+		print_info = {} # dictionary: { layer name : [tile1, ... ], ... }
+
 		for tile in tiles:
 			if tile.worldlayer.name != 'mobs':
-				s_add_message(custom_convert_phrase_to_list([(tile.worldlayer.name+':', [255,255,255]), (tile.examine+'^',tile.color)]), self.window.xlen-1, self.add_new_row)
+				if tile.worldlayer.name not in print_info:
+					print_info[tile.worldlayer.name] = [tile]
+				else:
+					print_info[tile.worldlayer.name].append(tile)
+
+		for print_layer in print_info:
+			print_message = [(print_layer+":", (255,255,255))]
+			for tile in print_info[print_layer]:
+				print_message.append((tile.examine, tile.color))
+
+			s_add_message(custom_convert_phrase_to_list(print_message), self.window.xlen-1, self.add_new_row)
 
 	def prepare_mob_info(self, mob):
 		# set up print

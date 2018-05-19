@@ -223,9 +223,10 @@ World layers (from lowest to highest):
 """
 
 #Misc
-player = light_tile('@', [71, 71, 71], True, False, 'This is you.', True, 10, [0,0,0], 500, 0, world_layer='terrain')
-space = tile('.', [240,255,255], True, False, 'That is empty space.', world_layer='terrain')
-empty = tile(u'█', [240,255,255], True, False, 'Empty', world_layer='terrain')
+player = light_tile('@', [71, 71, 71], True, False, 'You.', True, 10, [0,0,0], 500, 0, world_layer='terrain')
+space = tile('.', [240,255,255], True, False, 'Empty space.', world_layer='terrain')
+empty = tile(u'█', [240,255,255], True, False, 'Empty space.', world_layer='terrain')
+test_multi_tile = tile('%', [240,0,20], True, False, 'Empty space.', world_layer='test multi layer')
 
 #Vegetation
 grass_tile = tile('.', [50,205,50], True, False, 'Grass.', weather_sens = True, world_layer='constructs')

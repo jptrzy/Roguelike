@@ -95,7 +95,8 @@ class commands(object):
 
 			construct_lib = {
 			terminal.TK_W : tiles.wall_wood,
-			terminal.TK_G : tiles.gray_glass
+			terminal.TK_G : tiles.gray_glass,
+			terminal.TK_M : tiles.test_multi_tile
 			}
 
 			try:
@@ -108,7 +109,7 @@ class commands(object):
 			if game.world.layers.add_tile(game.me.y + self.move[dir][0], game.me.x + self.move[dir][1], construct):
 				game.message_panel.add_phrase('Placed ' + construct.examine.lower(), [255,255,255])
 			else:
-				game.message_panel.add_phrase('Error placing constructy.', [255,0,0])
+				game.message_panel.add_phrase('Error placing construct.', [255,0,0])
 			game.message_panel.print_messages()
 			game.update_screen()
 
