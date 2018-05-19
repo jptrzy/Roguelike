@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Saves folder
+/saves/
+
+# Font
+*.ttf
+
 # C extensions
 *.so
 
