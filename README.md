@@ -1,7 +1,7 @@
 # Unnamed Roguelike Project
 
 ## Overview
-This is a currently unnamed roguelike game project. So far, the game has no goal or theme
+This is a currently unnamed roguelike game project. So far, the game has no goal or theme.
 
 I started this roguelike game project in the summer of 2014. I wanted to learn programming by working on my own project, so I decided to try and program my own roguelike game. The project originally used the windows terminal for display, then ncurses, and now uses BearLibTerminal. Since the project was started when I had very little programming experience, some portions of code are really ugly. I am working on revising these areas of code to make the project more readable and efficient.
 
