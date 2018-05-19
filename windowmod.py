@@ -404,7 +404,7 @@ class text_popup(popup):
 
 	def print_scroll(self):
 		bar_length = self.body_row_display_length-2
-		scroll_bar_length = int(round((float(bar_length) / self.body_row_length)*bar_length))
+		scroll_bar_length = int(round((float(bar_length) / self.body_row_length)*bar_length))+1
 
 		self.window.put(1+self.title_row_length, self.row_width+1, u'█', color=(100,100,100))
 		self.window.put(1+self.title_row_length, self.row_width+1, '^')
@@ -416,6 +416,9 @@ class text_popup(popup):
 			self.window.put(2+i+self.title_row_length, self.row_width+1, u'█', color=(230,0,0,0))
 
 		start_scroll_bar_index = int(math.ceil((float(self.min_row) / self.body_row_length)*bar_length))
+
+		if start_scroll_bar_index + scroll_bar_length > bar_length:
+			start_scroll_bar_index -= 1
 
 		for i in range(scroll_bar_length):
 			self.window.put(start_scroll_bar_index+i+2+self.title_row_length, self.row_width+1, u'█', color=(100,100,100))
