@@ -1,0 +1,19 @@
+center map at (cy, cx)
+
+x_len odd:
+- - o - -
+topx = cx - x_len / 2
+
+
+x_len even:
+- - o - - -
+topx = cx - x_len / 2 + 1
+
+example: x_len and y_len both even:
+-2        3
+- - - - - - -2
+- - - - - -
+- - o - - -
+- - - - - -
+- - - - - -
+- - - - - - 3
