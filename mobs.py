@@ -91,7 +91,7 @@ class living(object):
 					dynam_stat.color_info[n][i] = int(0.7*dynam_stat.color_info[n][i])
 
 	def move_to_cord(self, y, x):
-		if not (y, x) in self.worldmap.entity_map.tiles:
+		if not (y, x) in self.group.mob_lib:
 			if (self.go_thru_walls) or ((not self.go_thru_walls) and (self.worldmap.check_passable(y, x))):
 				self.remove()
 				self.add(y, x)
@@ -99,7 +99,7 @@ class living(object):
 					self.aura._move(y, x)
 
 	def remove(self):
-		del self.worldmap.entity_map.tiles[(self.y, self.x)]
+		self.worldmap.layers.delete_tile(self.y, self.x, self.tile)
 		del self.group.mob_lib[(self.y, self.x)]
 
 	def add(self, y, x):
@@ -109,7 +109,7 @@ class living(object):
 		self.mapy = self.worldmap.get_mapy(y)
 		self.mapx = self.worldmap.get_mapx(x)
 
-		self.worldmap.entity_map.tiles[(self.y, self.x)] = self.tile
+		self.worldmap.layers.add_tile(self.y, self.x, self.tile)
 		self.group.mob_lib[(y, x)] = self
 
 	def spawn(self, y, x, worldmap, FOV, group):
@@ -117,7 +117,7 @@ class living(object):
 		self.worldmap = worldmap
 		self.FOV = FOV
 		#check if place is spawnable
-		if not (y, x) in self.worldmap.entity_map.tiles:
+		if not (y, x) in self.group.mob_lib:
 			if (self.go_thru_walls) or ((not self.go_thru_walls) and (self.worldmap.check_passable(y, x))):
 				if self.emit:
 					self.aura = self.tile.aura_maker.create_aura(self.worldmap, self.worldmap.aura_group, self.worldmap.glow_coords, self.FOV)
@@ -335,17 +335,17 @@ class mob_group(object):
 		return len(self.active_mobs)
 
 #name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, emit=False, pathfinding=True
-test_mob_tile = tiles.tile(u'[font=entity]T[/font]', [255,99,71], False, False, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus varius pharetra finibus. Fusce ac vehicula massa, eu dapibus leo. Praesent viverra, urna vitae tempus mattis, nisi felis venenatis ligula, ac tempus eros mi at orci. Aenean luctus auctor erat, non ornare elit mattis quis. Quisque eget mi in ligula consequat mattis. Sed tempor faucibus risus vitae ultricies. Integer at mauris ex. Praesent in nisl orci. Vivamus in placerat risus, vitae elementum neque. Nunc porta sapien sit amet orci efficitur, feugiat luctus felis vestibulum. Morbi viverra ante sed lectus imperdiet, at ornare ipsum mattis. Ut metus sapien, convallis eu porta et, volutpat a tellus. Suspendisse justo tortor, interdum quis elit eget, dictum consectetur felis. Ut vestibulum ultricies tortor. Nunc vitae neque bibendum, dignissim nulla egestas, consequat orci.', tile_type = 'entity')
+test_mob_tile = tiles.tile(u'T', [255,99,71], False, False, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus varius pharetra finibus. Fusce ac vehicula massa, eu dapibus leo. Praesent viverra, urna vitae tempus mattis, nisi felis venenatis ligula, ac tempus eros mi at orci. Aenean luctus auctor erat, non ornare elit mattis quis. Quisque eget mi in ligula consequat mattis. Sed tempor faucibus risus vitae ultricies. Integer at mauris ex. Praesent in nisl orci. Vivamus in placerat risus, vitae elementum neque. Nunc porta sapien sit amet orci efficitur, feugiat luctus felis vestibulum. Morbi viverra ante sed lectus imperdiet, at ornare ipsum mattis. Ut metus sapien, convallis eu porta et, volutpat a tellus. Suspendisse justo tortor, interdum quis elit eget, dictum consectetur felis. Ut vestibulum ultricies tortor. Nunc vitae neque bibendum, dignissim nulla egestas, consequat orci.', world_layer = 'mobs')
 test_mob = mob_maker(name='a test mob', tile=test_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10)
 
-test_light_mob_tile = tiles.light_tile(u'[font=entity]L[/font]', [0,0,0], False, False, 'a test light mob', True, 3, [249, 173, 34], 500, 0.5, tile_type='entity')
+test_light_mob_tile = tiles.light_tile(u'L', [0,0,0], False, False, 'a test light mob', True, 3, [249, 173, 34], 500, 0.5, world_layer='mobs')
 test_light_mob = mob_maker(name='testlightmob1', tile=test_light_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, emit=True)
 
-test_speed_mob_tile = tiles.tile(u'[font=entity]ጿ[/font]', [142, 185, 255], False, False, 'a test speed mob', tile_type='entity')
+test_speed_mob_tile = tiles.tile(u'ጿ', [142, 185, 255], False, False, 'a test speed mob', world_layer='mobs')
 test_speed_mob = mob_maker(name='test speed mob', tile=test_speed_mob_tile, health=100, speed=200, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10)
 
-blind_mob_tile = tiles.tile('B', [142, 185, 255], False, False, 'a blind mob', tile_type = 'entity')
+blind_mob_tile = tiles.tile('B', [142, 185, 255], False, False, 'a blind mob', world_layer = 'mobs')
 test_blind_mob = mob_maker(name='blind test mob', tile=blind_mob_tile, health=100, speed=50, sight_range=3, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=5)
 
-determined_mob_tile = tiles.tile("D", [255, 0, 0], False, False, 'a determined mob', tile_type = 'entity')
+determined_mob_tile = tiles.tile("D", [255, 0, 0], False, False, 'a determined mob', world_layer = 'mobs')
 test_determined_mob = mob_maker(name='determined mob', tile=determined_mob_tile, health=100,speed=50,sight_range=100,stamina=100,hunger=100,thirst=100,mana=100,hostile=True,sense=100)

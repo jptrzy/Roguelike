@@ -6,9 +6,9 @@ import math
 """
 main windows: 
 	world display (layers 0 to 100):
-		terrain map (1)
-		conmap (10)
-		entity map (20)
+		terrain (1)
+		constructs (2)
+		mobs (3)
 
 		x : 16 to x_len - 16
 		y : 0 to y_len - 14
@@ -44,7 +44,7 @@ popup windows: layer 201+
 """
 
 class window(object):
-	def __init__(self, ylen, xlen, y, x, layer=0, wtype='normal', multi_layer=True):
+	def __init__(self, ylen, xlen, y, x, layer=0, wtype='normal', multi_layer=False):
 		self.y = y
 		self.x = x
 		self.ylen = ylen
@@ -154,8 +154,6 @@ class panel(object):
 		self.x = x
 
 	def add_win(self, wlayer):
-		global window
-
 		new_win = window(self.ylen, self.xlen, self.y, self.x, layer=wlayer)
 
 		if len(self.windows) != 0:
@@ -170,6 +168,12 @@ class panel(object):
 			self.windows.append(new_win)
 
 		return new_win
+
+	def del_win(self, wlayer):
+		for window in self.windows:
+			if window.layer == wlayer:
+				window.clear()
+				self.windows.remove(window)
 
 
 	def clear(self):

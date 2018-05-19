@@ -4,7 +4,7 @@ import gradient
 import copy
 
 class tile(object):
-	def __init__(self, icon, color, passable, blockable, examine, tile_type = 'terrain', weather_sens = False):
+	def __init__(self, icon, color, passable, blockable, examine, world_layer, weather_sens = False, ghost_tile = False):
 		self.icon = icon
 
 		self.color = color
@@ -13,18 +13,18 @@ class tile(object):
 		self.blockable = blockable
 		self.examine = examine
 
-		self.tile_type = tile_type
-
+		self.worldlayer_name = world_layer
 
 		self.weather_sens = weather_sens
+		self.ghost_tile = ghost_tile
 
 	def _create(self):
-		return tile(self.icon, self.color, self.passable, self.blockable, self.examine, self.tile_type, self.weather_sens)
-
+		new_tile = tile(self.icon, self.color, self.passable, self.blockable, self.examine, self.world_layer, self.weather_sens, self.ghost_tile)
+		return new_tile
 
 class light_tile(tile):
-	def __init__(self, icon, color, passable, blockable, examine, glow, glow_range, glow_color, glow_str, glow_color_str, tile_type = 'terrain', weather_sens = False):
-		tile.__init__(self, icon, color, passable, blockable, examine, tile_type, weather_sens)
+	def __init__(self, icon, color, passable, blockable, examine, glow, glow_range, glow_color, glow_str, glow_color_str, world_layer, weather_sens = False, ghost_tile=False):
+		tile.__init__(self, icon, color, passable, blockable, examine, world_layer, weather_sens, ghost_tile)
 
 		self.aura_maker = aura_maker(glow, glow_range, glow_color, glow_str, glow_color_str)
 
@@ -214,45 +214,52 @@ class aura_maker(aura):
 		new_aura._init(worldmap, aura_group, glow_coords, FOV)
 
 		return new_aura
-	
+
+"""
+World layers (from lowest to highest):
+- terrain
+- constructs
+- mobs
+"""
+
 #Misc
-player = light_tile('@', [71, 71, 71], True, False, 'This is you.', True, 10, [0,0,0], 500, 0)
-space = tile('.', [240,255,255], True, False, 'That is empty space.')
-empty = tile(u'█', [240,255,255], True, False, 'Empty')
+player = light_tile('@', [71, 71, 71], True, False, 'This is you.', True, 10, [0,0,0], 500, 0, world_layer='terrain')
+space = tile('.', [240,255,255], True, False, 'That is empty space.', world_layer='terrain')
+empty = tile(u'█', [240,255,255], True, False, 'Empty', world_layer='terrain')
 
 #Vegetation
-grass_tile = tile('.', [50,205,50], True, False, 'Grass.', weather_sens = True)
-short_grass = tile(',', [0,128,0], True, False, 'Short blades of grass.', weather_sens = True)
-tall_grass = tile('/', [0,100,0], True, False, 'Tall, view-obstructing grass.')
-short_tree = tile(u'ŧ', [127,255,0], True, False, 'A short but sturdy tree.')
-tall_tree = tile(u'Ŧ', [34,139,34], False, True, 'A tall, impassible tree.')
+grass_tile = tile('.', [50,205,50], True, False, 'Grass.', weather_sens = True, world_layer='constructs')
+short_grass = tile(',', [0,128,0], True, False, 'Short blades of grass.', weather_sens = True, world_layer='constructs')
+tall_grass = tile('/', [0,100,0], True, False, 'Tall, view-obstructing grass.', world_layer='constructs')
+short_tree = tile(u'ŧ', [127,255,0], True, False, 'A short but sturdy tree.', world_layer='constructs')
+tall_tree = tile(u'Ŧ', [34,139,34], False, True, 'A tall, impassible tree.', world_layer='constructs')
 
-mrock = tile('#', [217,224,195], True, False, 'Strong and sturdy mountain rock.')
-largerock = tile('#', [125,136,127], False, True, 'Tall and cragged rock.')
+mrock = tile('#', [217,224,195], True, False, 'Strong and sturdy mountain rock.', world_layer='constructs')
+largerock = tile('#', [125,136,127], False, True, 'Tall and cragged rock.', world_layer='constructs')
 
 
 #Light and aura
 
 	#def __init__(self, icon, color, passable, blockable, examine, glow, glow_range, glow_color, glow_str, glow_color_str, tile_type = 'terrain', weather_sens = False):
 
-torch_dim = light_tile('*', [249,125,34], True, False, 'A dim torch.', True, 3, [249, 173, 34], 1000, 0.6)
-torch = light_tile('*', [249,125,34], True, False, 'A bright torch.', True, 8, [249, 173, 34], 1000, 0.6)
-torch_blue = light_tile('*', [69,152,224], True, False, 'A bright blue torch.', True, 8, [69,152,224], 1000, 0.6)
+torch_dim = light_tile('*', [249,125,34], True, False, 'A dim torch.', True, 3, [249, 173, 34], 1000, 0.6, world_layer='constructs')
+torch = light_tile('*', [249,125,34], True, False, 'A bright torch.', True, 8, [249, 173, 34], 1000, 0.6, world_layer='constructs')
+torch_blue = light_tile('*', [69,152,224], True, False, 'A bright blue torch.', True, 8, [69,152,224], 1000, 0.6, world_layer='constructs')
 
 #Constructs
-black_block = tile(u'█', [0,0,0], False, True, 'black block 0 0 0 non passable and blockable')
+black_block = tile(u'█', [0,0,0], False, True, 'black block 0 0 0 non passable and blockable', world_layer='constructs')
 
-floor_wood = tile('.', [193,154,107], True, False, 'Wooden flooring.')
+floor_wood = tile('.', [193,154,107], True, False, 'Wooden flooring.', world_layer='constructs')
 
-wall_wood = tile('#', [102, 51, 0], False, True, 'Wooden walls.')
-wall_stone = tile('#', [204, 204, 204], False, True, 'A sturdy stone wall.')
+wall_wood = tile('#', [102, 51, 0], False, True, 'Wooden walls.', world_layer='constructs')
+wall_stone = tile('#', [204, 204, 204], False, True, 'A sturdy stone wall.', world_layer='constructs')
 
-gray_glass = tile(u'█', [100,100,100], False, False, 'Gray glass.')
+gray_glass = tile(u'█', [100,100,100], False, False, 'Gray glass.', world_layer='constructs')
 
-bed = tile('b', [245,245,220], True, False, 'A ragged and sloppy bed.')
-fire_home = light_tile('f', [255,69,0], False, False, 'A low, hearthy fire.', True, 3, [252, 122, 30], 1000, 1000)
-wooden_door = tile('+', [102, 51, 0], False, True, 'A closed wooden door. It creaks with age.')
-open_wooden_door = tile('-', [102, 51, 0], True, False, 'An open wooden door. Beware of unexpected visitors.')
+bed = tile('b', [245,245,220], True, False, 'A ragged and sloppy bed.', world_layer='constructs')
+fire_home = light_tile('f', [255,69,0], False, False, 'A low, hearthy fire.', True, 3, [252, 122, 30], 1000, 1000, world_layer='constructs')
+wooden_door = tile('+', [102, 51, 0], False, True, 'A closed wooden door. It creaks with age.', world_layer='constructs')
+open_wooden_door = tile('-', [102, 51, 0], True, False, 'An open wooden door. Beware of unexpected visitors.', world_layer='constructs')
 
 #Worldmap Chunk tiles
 class chunktile(object):

@@ -105,10 +105,10 @@ class commands(object):
 				dir = type_of_construct
 				construct = tiles.black_block
 			
-			if game.world.conmap.add_tile(game.me.y + self.move[dir][0], game.me.x + self.move[dir][1], construct):
+			if game.world.layers.add_tile(game.me.y + self.move[dir][0], game.me.x + self.move[dir][1], construct):
 				game.message_panel.add_phrase('Placed ' + construct.examine.lower(), [255,255,255])
 			else:
-				game.message_panel.add_phrase('Something is already there.', [255,0,0])
+				game.message_panel.add_phrase('Error placing constructy.', [255,0,0])
 			game.message_panel.print_messages()
 			game.update_screen()
 
@@ -160,7 +160,7 @@ class commands(object):
 			torchy = game.me.y + self.move[dir][0]
 			torchx = game.me.x + self.move[dir][1]
 
-			if game.world.conmap.add_tile(torchy, torchx, torch):
+			if game.world.layers.add_tile(torchy, torchx, torch):
 				new_aura=torch.aura_maker.create_aura(game.world, game.world.aura_group, game.world.glow_coords, game.FOV)
 				new_aura._spawn(torchy, torchx)
 

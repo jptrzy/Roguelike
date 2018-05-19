@@ -136,12 +136,10 @@ class info_panel(object):
 		return True
 
 	def prepare_tile_info(self, y, x, worldmap):
-		for layer in worldmap.map_layers:
-			if layer.name != 'entities':
-				if (y, x) in layer.tiles:
-					tile = layer.tiles[(y, x)]
-					s_add_message(custom_convert_phrase_to_list([(layer.name+':', [255,255,255]), (tile.examine+'^',tile.color)]), self.window.xlen-1, self.add_new_row)
-
+		tiles = worldmap.layers.get_tiles(y, x)
+		for tile in tiles:
+			if tile.worldlayer.name != 'mobs':
+				s_add_message(custom_convert_phrase_to_list([(tile.worldlayer.name+':', [255,255,255]), (tile.examine+'^',tile.color)]), self.window.xlen-1, self.add_new_row)
 
 	def prepare_mob_info(self, mob):
 		# set up print

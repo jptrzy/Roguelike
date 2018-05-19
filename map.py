@@ -94,12 +94,12 @@ def chunk(world, mapy, mapx, rows=100, collumns=100):
 			else: 
 				new_tile_ = grid_tile(mapy, mapx)
 
-			world.map.add_tile(i + topy, n + topx, new_tile_[0])
+			world.layers.add_tile(i + topy, n + topx, new_tile_[0])
 
 			#apply constructs, sight block                     #     ----------use add_Construct func-----------------------#
 
 			if new_tile_[1] != None:
-				world.conmap.add_tile(i+topy, n+topx, new_tile_[1])
+				world.layers.add_tile(i+topy, n+topx, new_tile_[1])
 
 
 	### initialize rooms

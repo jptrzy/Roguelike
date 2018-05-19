@@ -77,7 +77,7 @@ class Game(object):
 		self.bg_windows.recalc_win(self.preferences.w_ylen, self.preferences.w_xlen, 0, 0, 150)
 		self.bg_windows.add_win(self.me.window)
 		self.bg_windows.add_win(self.all_mobs.window)
-		self.bg_windows.add_win(self.world.windows)
+		self.bg_windows.add_win(self.world.layers.windows)
 		self.bg_windows.add_win(self.message_panel.window)
 
 		self.left_panel = panel_windows()
@@ -108,7 +108,7 @@ class Game(object):
 		### create new character
 		self.all_mobs = mob_group()
 
-		player_tile = tiles.tile('[font=entity]@[/font]', [200, 200, 200], True, False, 'This is you.')
+		player_tile = tiles.tile('@', [200, 200, 200], True, False, 'This is you.', 'mobs')
 		self.me = character('bobb', player_tile, 100, 100, 30, 100, 100, 100, 100, False)
 
 		self.me.mapy = self.world.get_mapy(5000)

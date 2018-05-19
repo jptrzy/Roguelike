@@ -14,35 +14,114 @@ import mobs
 import gradient
 
 import time
+"""
+World layers (from lowest to highest):
+- terrain
+- constructs
+- mobs
+"""
 
 class worldlayer(object):
-	def __init__(self, worldmap, name=''):
-		self.tiles = {}
-		self.visible_tiles = {}
+	def __init__(self, worldmap, name, max_objects=1):
 		self.worldmap = worldmap
 		self.name = name
-		self.layer_group = self.worldmap.map_layers
-		self.layer_group.append(self)
+		self.max_objects = max_objects # max number of objects that can occupy a coordinate space in the layer
+
+		self.tiles = {} # dictionary: { (y, x) : number of objects }
+		self.layer_group = self.worldmap.layers
+
+	def add_tile(self, y, x): # checks if the tile is occupied DOES NOT CHECK IF BLOCKABLE
+		try:
+			if self.tiles[(y, x)] + 1 > self.max_objects:
+				successful = False
+			else:
+				self.tiles[(y, x)] += 1
+				successful = True
+
+		except KeyError:
+			self.tiles[(y, x)]  = 1
+			successful = True
+
+		return successful
+
+	def delete_tile(self, y, x):
+		try:
+			self.tiles[(y, x)] -= 1
+		except KeyError:
+			return
+
+class layer_tracker(object):
+	def __init__(self, worldmap):
+		self.worldmap = worldmap
+
+		self.worldlayers_count = 0
+
+		self.worldlayers = {}     # dictionary: { "world layer name" : world layer object, ... }
+		self.tiles = {}           # dictionary: { (y, x) : [tile1, tile2, tile3, ... ], ... }
+
+		self.visible_tiles_info = {} # dictionary of tile data as specified in worldmap.recalc_view
+
+		self.windows = panel(self.worldmap.w_ylen, self.worldmap.w_xlen, 1, 16)
+
+		self.top_window = self.windows.add_win(self.worldlayers_count+1)
+
+	def add_layer(self, name, max_objects=1):
+		new_worldlayer = worldlayer(self.worldmap, name, max_objects)
+		self.worldlayers[new_worldlayer.name] = new_worldlayer
+		self.worldlayers_count += 1
+		new_worldlayer.window = self.windows.add_win(self.worldlayers_count)
+
+		self.recalc_top_window()
+
+	def recalc_top_window(self):
+		self.windows.del_win(self.top_window.layer)
+		self.top_window = self.windows.add_win(self.worldlayers_count+1)
 
 	def add_tile(self, y, x, tile):
-		try:
-			self.tiles[(y, x)]
-			return False
-		except KeyError:
-			if self.worldmap.check_passable(y, x):
-				self.tiles[(y, x)] = tile._create()
-				self.worldmap.recalc_blockable(y, x)
-				return True
+		tile.worldlayer = self.worldlayers[tile.worldlayer_name]
+		if not tile.worldlayer.add_tile(y, x):
+			successful = False
+		else:
+			# worldlayer able to store object, now check other conditions
+			if (not tile.ghost_tile) and (not self.worldmap.check_passable(y, x)):
+				successful = False
 			else:
-				return False
+				# tile able to be placed.
+				try:
+					self.tiles[(y, x)].append(tile)
+				except KeyError:
+					self.tiles[(y, x)] = [tile]
+
+				successful = True
+
+		if successful:
+			self.recalculate_space(y, x)
+
+		return successful
 
 	def delete_tile(self, y, x, tile):
 		try:
-			del self.tiles[(y, x)]
-			self.worldmap.recalc_blockable(y, x)
-			return True
+			self.tiles[(y, x)].remove(tile)
+			tile.worldlayer.delete_tile(y, x)
+			successful = True
 		except KeyError:
-			return False
+			successful = False
+
+		if successful:
+			self.recalculate_space(y, x)
+
+		return successful
+
+	def recalculate_space(self, y, x):
+		self.worldmap.recalc_blockable(y, x)
+
+
+	def get_tiles(self, y, x):
+		# returns a list of all tiles within the space
+		try:
+			return self.tiles[(y, x)]
+		except KeyError:
+			return None
 
 class worldmap(object):
 	def __init__(self, ylen, xlen, gametype):
@@ -59,14 +138,14 @@ class worldmap(object):
 		self.tmap = []
 		self.cmap = []
 
-		self.map_layers = []
+		# initialize layers
+		self.layers = layer_tracker(self)
+		self.layers.add_layer('terrain', max_objects=1)
+		self.layers.add_layer('constructs', max_objects=1)
+		self.layers.add_layer('mobs', max_objects=1)
 
-		self.map = worldlayer(self, name='terrain')              #terrain, not destructible
-		self.conmap = worldlayer(self, name='constructs')           #constructs
-		self.entity_map = worldlayer(self, name='entities')	   #entities (only tiles)
 
-
-		self.seethrough = set([])        #sight block map, upper layer
+		self.seethrough = set([])        #sight block map
 
 		self.aura_group = {}      #aura_group, glow_coords
 
@@ -106,7 +185,7 @@ class worldmap(object):
 	def recalc_win(self, game_w_ylen, game_w_xlen):
 		self.w_xlen = game_w_xlen - 32 # 32 from side panels
 		self.w_ylen = game_w_ylen - 16 # 15 for message window
-		self.windows.resize(self.w_ylen, self.w_xlen)
+		self.layers.windows.resize(self.w_ylen, self.w_xlen)
 
 	def initworld(self):
 		### init grid
@@ -160,121 +239,10 @@ class worldmap(object):
 				else:
 					self.dmap[i][x] = [self.newchunk(self.worldmap[i][x])]
 
-		#defines terrain and forests, etc -----------------------------------------------------
-
-		# #### mountains ####
-		# mountdata = {}
-
-		# for i in range(random.randint(1, 3)):
-		# 	while True:
-		# 		mountstart = [random.randint(20, 80), random.randint(20, 80)]
-		# 		if self.worldmap[mountstart[0]][mountstart[1]] != None:
-		# 			if not bresenham.distance(mountstart, [50, 50], 30):
-		# 				break
-
-		# 	# draw path
-		# 	mountainpath = []
-
-		# 	disty = mountstart[0] - 50
-		# 	distx = mountstart[1] - 50
-
-		# 	if abs(disty) >= abs(distx):
-		# 		mounttall = True
-		# 	else:
-		# 		mounttall = False
-			
-		# 	if mountstart[0] >= 50:
-		# 		if mountstart[1] >= 50:
-		# 			#bot. right
-		# 			mountdirection = 'bot. right'
-		# 		else:
-		# 			#bot. left
-		# 			mountdirection = 'bot. left'
-		# 	else:
-		# 		if mountstart[1] >= 50:
-		# 			mountdirection = 'top right'
-		# 			#top right
-		# 		else:
-		# 			#top left
-		# 			mountdirection = 'top left'
-		# 	self.mountainloop(mountstart, mountdirection, mounttall, mountainpath)
-
-		# 	for mountaintile in mountainpath:
-		# 		if self.worldmap[mountaintile[0]][mountaintile[1]] != []:
-		# 			if mountaintile not in mountdata.keys():
-		# 				mountdata[(mountaintile[0]), mountaintile[1]] = tiles.w_mountain
-		# 			else:
-		# 				if self.is_surrounded(mountdata, mountaintile[0], mountaintile[1]):
-		# 					if random.randint(0, 5) != 0:
-		# 						mountdata[(mountaintile[0]), mountaintile[1]] = tiles.w_tallmountain		
-
-		# for mountain in mountdata.keys():
-		# 	if random.randint(0, 5) != 0 and self.is_surrounded(mountdata, mountain[0], mountain[1]):
-		# 		mountdata[mountain] = tiles.w_tallmountain
-
-		# 	#adds to map
-		# 	try:
-		# 		self.tmap[mountain[0]][mountain[1]][0] = mountdata[mountain]
-		# 	except IndexError:
-		# 		self.tmap[mountain[0]][mountain[1]].append(mountdata[mountain])
-
-		# ### forests ###
-
-		# for i in range(random.randint(2, 4)):
-		# 	randoffset = random.randint(self.radius/5, self.radius/2.5)
-		# 	starty = self.center[0] + (random.randint(-1, 1)) * (randoffset)
-		# 	startx = self.center[1] + (random.randint(-1, 1)) * (randoffset)
-			
-		# 	foresttiles = [[starty, startx]]
-		# 	forestdata = {(starty, startx) : tiles.w_forest}
-		# 	### grow
-		# 	for i in range(random.randint(8, 12)):
-		# 		for tree in foresttiles:
-		# 			pathy = tree[0]
-		# 			pathx = tree[1]
-
-		# 			rand_direction = random.randint(1, 4)
-
-		# 			if rand_direction == 1:    #North
-		# 				pathy -= 1
-		# 			elif rand_direction == 2:  #West
-		# 				pathx += 1
-		# 			elif rand_direction == 3:  #South
-		# 				pathy += 1
-		# 			else:                      #East
-		# 				pathx -= 1
-
-		# 			### checks for conflicts
-		# 			if pathy >= self.ylen or pathy == 0 or pathx >= self.xlen or pathx == 0:
-		# 				break
-		# 			if self.worldmap[pathy][pathx] != None:
-		# 				if (pathy, pathx) in forestdata.keys() and self.is_surrounded(forestdata, pathy, pathx):
-		# 					forestdata[(pathy, pathx)] = tiles.w_thickforest
-		# 				elif (pathy, pathx) not in forestdata.keys():
-		# 					foresttiles.append([pathy, pathx])
-		# 					forestdata[(pathy, pathx)] = tiles.w_forest
-
-
-		# 	### adds forest to map
-		# 	for tile in forestdata:
-		# 		try:
-		# 			if self.tmap[tile[0]][tile[1]][0] == tiles.w_mountain and forestdata[tile] == tiles.w_thickforest:
-		# 				self.tmap[tile[0]][tile[1]][0] = tiles.w_mountainforest
-
-		# 		except IndexError:
-		# 			self.tmap[tile[0]][tile[1]].append(forestdata[tile])
-
 		# #### everything else (grass) ####
 		for y in range(self.ylen):
 		 	for x in range(self.xlen):
 		 		self.tmap[y][x].append(tiles.w_void)
-
-		###  init windows
-		self.windows = panel(self.w_ylen, self.w_xlen, 1, 16)
-
-		self.map.window = self.windows.add_win(1)
-		self.conmap.window = self.windows.add_win(10)
-		self.entity_map.window = self.windows.add_win(20)
 
 		### init minimap
 		self.minimap = window(31, 30, 60, 60)
@@ -297,97 +265,6 @@ class worldmap(object):
 				pass
 		return True
 
-	# def mountainloop(self, mountstart, coord, tall, mountainpath):
-	# 	pathy = int(mountstart[0])
-	# 	pathx = int(mountstart[1])
-
-
-	# 	if tall:
-	# 		if coord in ['top right', 'top left']:
-	# 			direction = 1
-	# 		else:
-	# 			direction = -1
-
-	# 		for i in range(100):
-
-	# 			randvalues = [-1, 0, 1]
-	# 			randdir = randvalues[random.randint(1, 2)]
-	# 			pathx += randdir
-	# 			pathy += direction
-
-	# 			if 10 < pathy < 90 and 10 < pathx < 90:
-	# 				mountainpath.append((pathy, pathx))
-	# 			else:
-	# 				break
-
-	# 	else:
-	# 		if coord in ['top right', 'bot. right']:
-	# 			direction = -1
-	# 		else:
-	# 			direction = 1
-
-	# 		for i in range(100):
-	# 			randvalues = [-1, 0, 1]
-	# 			randdir = randvalues[random.randint(1, 2)]
-	# 			pathy += randdir
-	# 			pathx += direction
-
-	# 			if 10 < pathy < 90 and 10 < pathx < 90:
-	# 				mountainpath.append((pathy, pathx))
-	# 			else:
-	# 				break
-
-	# 	# dynamic
-	# 	branches = []
-
-	# 	length = len(mountainpath)
-
-	# 	for i in range(length):
-	# 		i_n = ((float(i) / float(length)) * 100)
-	# 		x = mountainpath[i][1]
-	# 		y = mountainpath[i][0]
-
-	# 		if i_n <= 10 or i_n >= 90:
-	# 			pass
-				
-	# 		else:
-	# 			if tall:
-	# 				cord = x
-	# 			else:
-	# 				cord = y
-
-	# 			if i_n <= 30 or i_n >= 70:
-	# 				checklist = [cord - 1, cord + 1]
-	# 			elif i_n <= 45 or i_n >= 55:
-	# 				checklist = [cord - 2, cord - 1, cord + 1, cord + 2]
-	# 			else:
-	# 				checklist = [cord - 3, cord - 2, cord - 1, cord + 1, cord + 2, cord + 3]
-
-	# 			for checkpath in checklist:
-	# 				if 10 < checkpath < 90:
-	# 					if tall:
-	# 						branches.append((y, checkpath))
-	# 					else:
-	# 						branches.append((checkpath, x))
-
-	# 	for branch in branches:
-	# 		mountainpath.append(branch)
-			
-
-
-
-	def godprint(self, map):
-		for row in range(self.ylen):
-			printrow = []
-			for collumn in range(self.xlen):
-				printrow.append(str(map[row][collumn][0].icon))
-			print string.join(printrow)
-
-	def worldprint(self, map):
-		for y in range(self.ylen):
-			for x in range(self.xlen):
-				terminal.put(x, y, str(map[y][x][0].icon))
-
 	def minimapprint(self, mapy, mapx):
 		self.minimap.clear()
 		minitopy = mapy - 15
@@ -404,21 +281,20 @@ class worldmap(object):
 
 	def printview(self, game):
 		#p time_3 = time.clock()
-		self.windows.clear()
-		#self.windows.windows
-		for layer in self.map_layers:
-			for tilecoord in layer.visible_tiles:
-				#{ (window coords) : [tile1, tile_color1] }
-				layer_data = layer.visible_tiles[tilecoord]
-				current_tile = layer_data[0]
-				layer.window.put(tilecoord[0], tilecoord[1], current_tile.icon, layer_data[1])
+		self.layers.windows.clear()
+		
+		for tilecoord in self.layers.visible_tiles_info:
+			#{ (window coords) : [[tile1, tile_color1], ... ] }
+			for tile_data in self.layers.visible_tiles_info[tilecoord]:
+				current_tile = tile_data[0]
+				current_tile.worldlayer.window.put(tilecoord[0], tilecoord[1], current_tile.icon, tile_data[1])
 		
 		#p print("print view: --- %s seconds ---" % (time.clock() - time_3))
 		#p print("--------------------------------------------------------")
 		#p print("--------------------------------------------------------")
 
 	def print_indicator(self, y, x, indicator=u'×'):
-		self.windows.windows[-1].fx.put(y - self.window_top_y, x - self.window_top_x, indicator)
+		self.layers.top_window.put(y - self.window_top_y, x - self.window_top_x, indicator)
 
 	def recalc_FOV(self, game):
 		#p time_1 = time.clock()
@@ -450,7 +326,6 @@ class worldmap(object):
 	def recalc_view(self, game, y, x):
 		#p time_2 = time.clock()
 
-		self.visible_tiles = {}    # { (coords) : [[tile1, emit_color1, dark_color1, tile_color1], ... ] }
 		sun_color = game.timer.day_night_color()
 		sun_emit_str = game.timer.day_night_emit_str()
 		sun_color_str = game.timer.day_night_color_str()
@@ -458,8 +333,7 @@ class worldmap(object):
 		self.window_top_y = y - self.w_ylen / 2
 		self.window_top_x = x - self.w_xlen / 2
 
-		for layer in self.map_layers:
-			layer.visible_tiles = {}
+		self.layers.visible_tiles_info = {}
 			
 		for tilecoord in self.visible_coords:
 			window_y = tilecoord[0] - self.window_top_y
@@ -476,18 +350,20 @@ class worldmap(object):
 				glow_strength = self.get_glow_str(game, tilecoord, sun_emit_str, distance_from_char, game.me)
 
 				if glow_strength >= game.me.get_sight_requirement(distance_from_char):
-
-					for layer in self.map_layers:
-						if tilecoord in layer.tiles:
+					tiles_in_coord = self.layers.get_tiles(tilecoord[0], tilecoord[1])
+					if tiles_in_coord != None:
+						for check_tile in tiles_in_coord:
 							tile_layer_data = []
-							check_tile = layer.tiles[tilecoord]
 							tile_layer_data.append(check_tile)
 
 							new_color = self.glow_coords._reblend(tilecoord, sun_color, amb_color_str, self.amb_emit_str, glow_strength, check_tile.color, game.me.y, game.me.x)
 
 							tile_layer_data.append(new_color)
 
-							layer.visible_tiles[(window_y, window_x)] = tile_layer_data
+							try:
+								self.layers.visible_tiles_info[(window_y, window_x)].append(tile_layer_data)
+							except KeyError:
+								self.layers.visible_tiles_info[(window_y, window_x)] = [tile_layer_data]
 
 		#p print("dynamic lighting: --- %s seconds ---" % (time.clock() - time_2))
 
@@ -551,12 +427,13 @@ class worldmap(object):
 
 	def recalc_blockable(self, tiley, tilex):       # recalc blockable
 		blocked = False
-		for layer in self.map_layers:
-			try:
-				if layer.tiles[(tiley, tilex)].blockable:
+		try:
+			for tile in self.layers.tiles[(tiley, tilex)]:
+				if tile.blockable:
 					blocked = True
-			except KeyError:
-				pass
+					break
+		except KeyError:
+			pass
 
 		if blocked:
 			self.seethrough.add((tiley, tilex))
@@ -571,10 +448,12 @@ class worldmap(object):
 
 
 	def check_passable(self, y, x):
-		for layer in self.map_layers:
-			if (y, x) in layer.tiles:
-				if not layer.tiles[(y, x)].passable:
+		try:
+			for tile in self.layers.tiles[(y, x)]:
+				if not tile.passable:
 					return False
+		except KeyError:
+			pass
 		return True
 
 	def newchunk(self, distance):
