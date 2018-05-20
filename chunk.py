@@ -146,7 +146,7 @@ class worldmap(object):
 		self.layers.add_layer('test multi layer', max_objects=10)
 
 
-		self.seethrough = set([])        #sight block map
+		self.blockable_coordinates = set([])        #sight block map
 
 		self.aura_group = {}      #aura_group, glow_coords
 
@@ -319,7 +319,7 @@ class worldmap(object):
 			for n in range(-1, sight*2 + 2):
 				self.distance_map[(rendy + i, rendx + n)] = math.hypot(locx - rendx - n, locy - rendy - i)
 
-		self.visible_coords = game.FOV.Calculate_Sight(self.seethrough, locy, locx, sight, self.distance_map)
+		self.visible_coords = game.FOV.Calculate_Sight(self.blockable_coordinates, locy, locx, sight, self.distance_map)
 
 		
 		#p print("FOV render: --- %s seconds ---" % (time.clock() - time_1))
@@ -445,16 +445,13 @@ class worldmap(object):
 			pass
 
 		if blocked:
-			self.seethrough.add((tiley, tilex))
+			if (tiley, tilex) not in self.blockable_coordinates:
+				# only change if necessary
+				self.blockable_coordinates.add((tiley, tilex))
+				self.glow_coords._recast((tiley, tilex))
 		else:
-			try:
-				self.seethrough.discard((tiley, tilex))
-			except KeyError:
-				pass
-
-		# recalc emit
-		self.glow_coords._recast((tiley, tilex))
-
+			if self.blockable_coordinates.discard((tiley, tilex)) != None:
+				self.glow_coords._recast((tiley, tilex))
 
 	def check_passable(self, y, x):
 		try:

@@ -185,7 +185,7 @@ class mob(living):
 		if self.can_move:
 			d_from_player = math.floor(((self.y - game.me.y)**2 + (self.x - game.me.x)**2)**0.5)
 
-			if (d_from_player <= self.sense) or (d_from_player <= self.sight_range and bresenham.check_line((self.y, self.x), (game.me.y, game.me.x), game.world.seethrough)):
+			if (d_from_player <= self.sense) or (d_from_player <= self.sight_range and bresenham.check_line((self.y, self.x), (game.me.y, game.me.x), game.world.blockable_coordinates)):
 				if d_from_player <= 1.5:
 					action.a_testAttack.prep(self, game.timer.time)
 					self.action_args = (self, game.me.y, game.me.x, self.mob_group.mob_lib)

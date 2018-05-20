@@ -88,7 +88,7 @@ class aura(object):
 			except KeyError:
 				self.glow_coords[glow_aff_tile_coord] = [self]
 
-			if glow_aff_tile_coord in self.worldmap.seethrough:
+			if glow_aff_tile_coord in self.worldmap.blockable_coordinates:
 				data = {}
 				for i in range(16):
 					data[i] = False # not illuminated
@@ -102,7 +102,7 @@ class aura(object):
 						if check_octant % 2 == 0:
 							y_fac = self.worldmap.octant_coords[check_octant][0]
 							x_fac = self.worldmap.octant_coords[check_octant][1]
-							if (glow_aff_tile_coord[0] + y_fac, glow_aff_tile_coord[1] + x_fac) in self.worldmap.seethrough:
+							if (glow_aff_tile_coord[0] + y_fac, glow_aff_tile_coord[1] + x_fac) in self.worldmap.blockable_coordinates:
 								break
 							else:
 								data[check_octant] = True
@@ -124,7 +124,7 @@ class aura(object):
 
 	def _cast_light(self): # use when opaque tile moves; must use _recalc_distance_map when source moves as well
 		if self.glow:
-			self.glow_aff_tiles_coords = self.FOV.Calculate_Sight(self.worldmap.seethrough, self.y, self.x, self.glow_range, self.g_distance_map)
+			self.glow_aff_tiles_coords = self.FOV.Calculate_Sight(self.worldmap.blockable_coordinates, self.y, self.x, self.glow_range, self.g_distance_map)
 
 	def _move(self, y, x):
 		self._remove_effect()
@@ -147,7 +147,6 @@ class glow_aff_dict(object):
 	def __init__(self, worldmap):
 		self.distinct = {} # { (coords) : [ source1, source2, ... ] }
 		self.worldmap = worldmap
-
 
 	def _recast(self, coords):   # due to change in opaque block
 		if coords in self.distinct:
