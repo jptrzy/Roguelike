@@ -384,9 +384,17 @@ class worldmap(object):
 		return glow_strength
 
 	def view(self, game):
+		#p FOV_time = time.clock()
 		self.recalc_FOV(game)
+		#p FOV_time = time.clock() - FOV_time
+		#p render_time = time.clock()
 		self.recalc_view(game, game.me.y, game.me.x)
+		#p render_time = time.clock() - render_time
+		#p print_time = time.clock()
 		self.printview(game)
+		#p print_time = time.clock() - print_time
+
+		#p print("FOV time: %s \n Render time: %s \n Print view time: %s \n" % (FOV_time, render_time, print_time))
 
 	def view_move(self, game, y, x):
 		self.recalc_view(game, y, x)

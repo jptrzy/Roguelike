@@ -109,7 +109,7 @@ class Game(object):
 		self.all_mobs = mob_group()
 
 		player_tile = tiles.tile('@', [200, 200, 200], True, False, 'This is you.', 'mobs')
-		self.me = character('bobb', player_tile, 100, 100, 30, 100, 100, 100, 100, False)
+		self.me = character('bobb', player_tile, 100, 100, 20, 100, 100, 100, 100, False)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)
@@ -133,7 +133,11 @@ class Game(object):
 		self.all_mobs.update(self)
 
 	def update_screen(self):
+		#p self.world.start_time = time.clock()
+		#p total_view_time_start = time.clock()
+		#p FOV_time, render_time, print_time = self.world.view(self)
 		self.world.view(self)
+		#p total_render_time = FOV_time+render_time+print_time
 		self.all_mobs.print_mob_data(self)
 		self.timer.vprint()
 		self.me.printstats()
