@@ -186,10 +186,11 @@ class commands(object):
 			message_test_popup = text_input_popup('Enter test message to be displayed on the message panel:', game.preferences.w_ylen, game.preferences.w_xlen, title='test title', activepopups=game.activepopups, only_ascii = False)
 			message_test = message_test_popup.init()
 			if message_test:
-				print '-------------'
-				game.message_panel.add_phrase(message_test)
+				if message_test == 'Lorem Ipsum':
+					game.message_panel.add_phrase("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec lacus urna, rhoncus eget eros id, aliquet efficitur quam. Cras aliquam malesuada ex ut dapibus. Aliquam non nisl diam. Ut eget enim gravida, convallis nunc vel, consequat massa. Praesent ultricies lorem fringilla mauris lobortis, quis tincidunt velit vulputate. Aenean luctus dolor quis nisl vestibulum, tristique sagittis nisi bibendum. Cras molestie pulvinar tortor vitae elementum. Ut eu erat at neque dapibus commodo. Cras a ligula hendrerit est tincidunt accumsan. Ut sed interdum turpis, suscipit mollis eros. Suspendisse libero nunc, sodales eu diam nec, feugiat pharetra felis. Nullam vitae gravida justo. Proin volutpat vestibulum pulvinar. Aliquam gravida suscipit odio in placerat. \\v Cras est orci, dapibus vel semper nec, luctus vel nisl. Maecenas scelerisque imperdiet vestibulum. Cras sed ligula sit amet nisi dictum euismod sit amet nec lacus. Curabitur dapibus tellus nec orci luctus, nec hendrerit diam ornare. Curabitur sed ipsum a ligula vulputate iaculis. Morbi dignissim lectus vitae mattis ultricies. In sem magna, vestibulum rutrum elementum sed, maximus eu turpis. Morbi laoreet lorem diam, et porta nunc vestibulum a. Pellentesque varius hendrerit lectus, id dignissim arcu porta sit amet. Curabitur in facilisis turpis, vitae consectetur ex. Aliquam erat ipsum, porttitor a ullamcorper at, mattis ac eros. \\v Curabitur maximus efficitur interdum. Vivamus varius fermentum nibh, hendrerit laoreet elit sodales auctor. Suspendisse pellentesque turpis vel finibus varius. Phasellus vel lectus vitae odio auctor vehicula at vitae lacus. Nunc sagittis pharetra nulla, sed pharetra sem volutpat a. Aliquam finibus nulla quis metus ultrices vulputate. Pellentesque gravida fermentum quam, a fringilla sem tempor et. Suspendisse porttitor sapien ac lacinia dignissim. Mauris ante sapien, malesuada vitae eros sed, egestas aliquam ipsum. Nunc venenatis, risus sit amet gravida malesuada, erat libero egestas nisl, eu gravida velit diam sit amet nisi. In sit amet mollis ante, a dictum mi. Fusce gravida nulla id justo porta, at euismod nulla porta. In non quam ex.")
+				else:
+					game.message_panel.add_phrase(message_test)
 				game.message_panel.print_messages()
-				print '-------------'
 
 		elif uinput == terminal.TK_A:
 			proceed = True

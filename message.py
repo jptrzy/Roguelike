@@ -81,7 +81,7 @@ def s_add_message(input_, row_length, func_add_new_row):
 				func_add_new_row(new_row)
 				s_add_message(input_[(i+1):], row_length, func_add_new_row)
 				return
-			elif letter_info[0][0] + letter_info[1][0] == '\\b':
+			elif letter_info[0][0] + letter_info[1][0] == '\\v':
 				func_add_new_row(new_row)
 				func_add_new_row([[' ', [0,0,0]]])
 				s_add_message(input_[(i+1):], row_length, func_add_new_row)
