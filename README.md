@@ -20,6 +20,7 @@ My YouTube channel where I sometimes showcase features of the game: https://www.
 
 ## Currently working on:
 
+* Using JSON files to store data instead of hard-coding
 * Map generation using the OpenSimplex noise library
 * Inventory and items
 
