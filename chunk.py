@@ -3,15 +3,15 @@ import random
 import string
 import copy
 import math
-from map import *
-from windowmod import *
+from worldgen import tile_gen
+from window import windows
 from bearlibterminal import terminal
 
-import tiles
-import bresenham
+from tiles_data import tiles
+from include import bresenham
 import weather
-import mobs
-import gradient
+from mobs import mobs
+from include import gradient
 
 import time
 """
@@ -61,7 +61,7 @@ class layer_tracker(object):
 
 		self.visible_tiles_info = {} # dictionary of tile data as specified in worldmap.recalc_view
 
-		self.windows = panel(self.worldmap.w_ylen, self.worldmap.w_xlen, 1, 16)
+		self.windows = windows.panel(self.worldmap.w_ylen, self.worldmap.w_xlen, 1, 16)
 
 		self.top_window = self.windows.add_win(self.worldlayers_count+1)
 
@@ -246,7 +246,7 @@ class worldmap(object):
 		 		self.tmap[y][x].append(tiles.w_void)
 
 		### init minimap
-		self.minimap = window(31, 30, 60, 60)
+		self.minimap = windows.window(31, 30, 60, 60)
 		self.minimapgrid = []
 		for i in range(30):
 			self.minimapgrid.append([[] for x in range(30)])
@@ -484,7 +484,7 @@ class worldmap(object):
 	def initchunk(self, y, x):
 		self.cmap[y][x].append('.')
 
-		chunk(self, y, x)
+		tile_gen.chunk(self, y, x)
 
 	def get_mapx(self, x):
 		return int(math.floor(x / 100))

@@ -2,9 +2,9 @@
 
 from bearlibterminal import terminal
 
-import mobs
+from mobs import mobs
 import action
-from windowmod import *
+from window import windows
 
 def process_request(request, game):
 	request = request.split()

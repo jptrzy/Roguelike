@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*- 
-import tiles
+from tiles_data import tiles
 import math
-import bresenham
-import a_star
-import gradient
+from include import bresenham
+from include import a_star
+from include import gradient
 import random
-import randomGen
+from include import randomGen
 
 import action
 
-from windowmod import *
+from window import windows
 
 class stat(object):
 	def __init__(self, max_amt, buffs=[], multipliers=[]):
@@ -271,7 +271,7 @@ class mob_group(object):
 		self.check_coords = [(0,0),(0,1),(1,0),(1,1),(0,-1),(-1,0),(-1,-1),(1,-1),(-1,1)]
 
 	def init_window(self, game_y_len, game_x_len):
-		self.window = window(game_y_len - 27, 14, 1, game_x_len - 15)
+		self.window = windows.window(game_y_len - 27, 14, 1, game_x_len - 15)
 
 	def recalc_win(self, game_y_len, game_x_len):
 		self.window.resize(game_y_len - 27, 14)

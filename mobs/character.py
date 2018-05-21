@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*- 
 ### character
-from windowmod import *
+from window import windows
 from mobs import *
-import tiles
-import gradient
+from tiles_data import tiles
+from include import gradient
 import string
 import math
 
@@ -19,7 +19,7 @@ class character(living):
 		self.inv = inv()
 
 	def window_init(self, game_y_len, game_x_len):
-		self.window = window(6, 14, 1, 1)  # health, mana, stamina, hunger+thirst
+		self.window = windows.window(6, 14, 1, 1)  # health, mana, stamina, hunger+thirst
 
 	def recalc_win(self, game_y_len, game_x_len):
 		self.window.move(1, 1)

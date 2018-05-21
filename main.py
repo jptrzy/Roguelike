@@ -4,11 +4,12 @@
 from gamehandler import *
 from mainmenu import *
 from bearlibterminal import terminal
-from windowmod import *
+from window import windows
 import os
 
 if __name__ == '__main__':
 	os.chdir('.')
+	os.sys.path.append('.')
 	
 	Preferences = preferences()
 	Preferences.load()
@@ -45,7 +46,7 @@ if __name__ == '__main__':
 
 		game.start_game(Preferences)
 		# ask to save game or not
-		ask_save_game_window = yes_or_no_popup('Save game? (y/n)', Preferences.w_ylen, Preferences.w_xlen)
+		ask_save_game_window = windows.yes_or_no_popup('Save game? (y/n)', Preferences.w_ylen, Preferences.w_xlen)
 		ask_save_game = ask_save_game_window.init()
 		if ask_save_game:
 			save_game = shelve.open(".\saves\\"+start_game_file, 'n')

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- 
-import tiles
+from tiles_data import tiles
 
 class biome(object):
 	def __init__(self, name, desc, default_tile):

@@ -1,8 +1,8 @@
 ### time counter
 from bearlibterminal import terminal
-from windowmod import *
+from window import windows
 
-import gradient
+from include import gradient
 
 import math
 
@@ -35,7 +35,7 @@ class timer(object):
 
 
 	def cursinit(self, game_w_ylen, game_w_xlen):
-		self.window = window(1, 50, 50, 0, layer=200)
+		self.window = windows.window(1, 50, 50, 0, layer=200)
 
 	def change_time(self, changed_time, game):
 		self.time = float(changed_time)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 from bearlibterminal import terminal
-from windowmod import *
+from windows import *
 from message import *
 
 import math

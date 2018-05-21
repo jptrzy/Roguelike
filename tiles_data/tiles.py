@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 import math
-import gradient
+from include import gradient
 import copy
 
 class tile(object):

@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*- 
 ### commands
 import weather
-import tiles
+from tiles_data import tiles
 import time
 import math
 import wizard
 
 from bearlibterminal import terminal
 
-import mobs
+from mobs import mobs
 import action
-from windowmod import *
+from window import windows
 
-class commands(object):
+class commands_handler(object):
 	def __init__(self):
 		self.move = {
 		### numpad on keyboard
@@ -183,7 +183,7 @@ class commands(object):
 			game.me.printstats()
 
 		elif uinput == terminal.TK_ENTER:
-			message_test_popup = text_input_popup('Enter test message to be displayed on the message panel:', game.preferences.w_ylen, game.preferences.w_xlen, title='test title', activepopups=game.activepopups, only_ascii = False)
+			message_test_popup = windows.text_input_popup('Enter test message to be displayed on the message panel:', game.preferences.w_ylen, game.preferences.w_xlen, title='test title', activepopups=game.activepopups, only_ascii = False)
 			message_test = message_test_popup.init()
 			if message_test:
 				if message_test == 'Lorem Ipsum':
@@ -249,7 +249,7 @@ class commands(object):
 
 		# wizard mode
 		elif uinput == terminal.TK_BACKSLASH: # text_input_popup
-			wizard_popup = text_input_popup('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consequat dui vel bibendum volutpat. Curabitur at turpis felis. Curabitur quis mauris eu orci rhoncus auctor vel non turpis. Cras egestas tellus sit amet est dignissim, et fringilla risus condimentum. \\b Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus.', game.preferences.w_ylen, game.preferences.w_xlen, title='Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title.', activepopups=game.activepopups)
+			wizard_popup = windows.text_input_popup('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consequat dui vel bibendum volutpat. Curabitur at turpis felis. Curabitur quis mauris eu orci rhoncus auctor vel non turpis. Cras egestas tellus sit amet est dignissim, et fringilla risus condimentum. \\b Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus.', game.preferences.w_ylen, game.preferences.w_xlen, title='Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title.', activepopups=game.activepopups)
 			wizard_command = wizard_popup.init()
 			if wizard_command:
 				wizard.process_request(wizard_command, game)

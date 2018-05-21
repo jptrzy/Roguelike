@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 from bearlibterminal import terminal
-from windowmod import *
+from window import windows
 import os
 
 class preferences(object):
@@ -13,9 +13,9 @@ class preferences(object):
 	def load(self):
 		pass # later, replace __init__ with load
 
-class choice(window):
+class choice(windows.window):
 	def __init__(self, text, y, x, layer):
-		window.__init__(self, 3, len(text)+2, y, x, layer=layer)
+		windows.window.__init__(self, 3, len(text)+2, y, x, layer=layer)
 		self.text = text
 	def print_text(self):
 		self.wprint(1, 1, self.text)
@@ -31,7 +31,7 @@ class main_menu(object):
 	def run_menu(self, preferences):
 		self.preferences = preferences
 		title = "Untitled Roguelike V.0.1"
-		title_window = window(1, len(title), preferences.w_ylen/4, preferences.w_xlen/2-len(title)/2)
+		title_window = windows.window(1, len(title), preferences.w_ylen/4, preferences.w_xlen/2-len(title)/2)
 		title_window.wprint(0, 0, title)
 
 		self.active_popups = 0 # keeps track of popup layers so they don't interfere
@@ -77,11 +77,11 @@ class main_menu(object):
 			os.chdir('..')
 			
 			if self.choices[self.choice] == new_game_option:
-				prompt_new_save_name = text_input_popup("Enter a file name: ", preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
+				prompt_new_save_name = windows.text_input_popup("Enter a file name: ", preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
 				new_save_file_name = prompt_new_save_name.init()
 				if new_save_file_name:
 					if new_save_file_name in saves:
-						confirm_overwrite_window = yes_or_no_popup("Save file exists. Overwrite? (y/n)", preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
+						confirm_overwrite_window = windows.yes_or_no_popup("Save file exists. Overwrite? (y/n)", preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
 						confirm_overwrite = confirm_overwrite_window.init()
 
 						if confirm_overwrite:
@@ -95,9 +95,9 @@ class main_menu(object):
 			elif self.choices[self.choice] == load_game_option:
 				num_loads = len(saves)
 				if num_loads == 0:
-					pure_text_popup(["Error: No file exists.", [255,0,0]], preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
+					windows.pure_text_popup(["Error: No file exists.", [255,0,0]], preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
 				else:
-					load_file_name_prompt = scroll_selection_popup("Select save file:", saves, preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
+					load_file_name_prompt = windows.scroll_selection_popup("Select save file:", saves, preferences.w_ylen, preferences.w_xlen, activepopups=self.active_popups)
 					load_file_name = load_file_name_prompt.init()
 					if load_file_name != None:
 						start_game = True

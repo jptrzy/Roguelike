@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 from bearlibterminal import terminal
-import randomGen
-import tiles
+from include import randomgen
+from tiles_data import tiles
 import biome
 import map_noise
 import random

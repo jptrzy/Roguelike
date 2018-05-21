@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*- 
 
 #main game file
-from map import *
-import tiles
+from tiles_data import tiles
 import time
 import chunk
 import weather
-from command import *
-import rpas
+from input_handler import command
+from include import rpas
 
 from bearlibterminal import terminal
 
-from character import *
+from mobs import character
+from mobs import mobs
 from timecounter import *
-from messagewindow import *
+from window import messagepanel
 from animation import *
-from infopanel import *
-from windowmod import *
+from window import infopanel
+from window import messagepanel
 
 import shelve
 
@@ -71,17 +71,17 @@ class Game(object):
 		self.all_mobs.init_window(self.preferences.w_ylen, self.preferences.w_xlen)
 		self.all_mobs.print_mob_data(self)
 		self.message_panel.curs_init(self.preferences.w_ylen, self.preferences.w_xlen)
-		self.info_panel = info_panel(self.preferences.w_ylen, self.preferences.w_xlen)
+		self.info_panel = infopanel.info_panel(self.preferences.w_ylen, self.preferences.w_xlen)
 
-		self.bg_windows = panel_windows()
+		self.bg_windows = windows.panel_windows()
 		self.bg_windows.recalc_win(self.preferences.w_ylen, self.preferences.w_xlen, 0, 0, 150)
 		self.bg_windows.add_win(self.me.window)
 		self.bg_windows.add_win(self.all_mobs.window)
 		self.bg_windows.add_win(self.world.layers.windows)
 		self.bg_windows.add_win(self.message_panel.window)
 
-		self.left_panel = panel_windows()
-		self.right_panel = panel_windows()
+		self.left_panel = windows.panel_windows()
+		self.right_panel = windows.panel_windows()
 
 		self.left_panel.add_win(self.me.window)
 		self.right_panel.add_win(self.all_mobs.window)
@@ -106,10 +106,10 @@ class Game(object):
 #		self.anim = anim_handler()
 
 		### create new character
-		self.all_mobs = mob_group()
+		self.all_mobs = mobs.mob_group()
 
 		player_tile = tiles.tile('@', [200, 200, 200], True, False, 'This is you.', 'mobs')
-		self.me = character('bobb', player_tile, 100, 100, 20, 100, 100, 100, 100, False)
+		self.me = character.character('bobb', player_tile, 100, 100, 20, 100, 100, 100, 100, False)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)
@@ -119,10 +119,10 @@ class Game(object):
 		self.me.spawn(5000, 5000, self.world, self.FOV, self.all_mobs)
 
 		### init command, time
-		self.commandframe = commands()
+		self.commandframe = command.commands_handler()
 
 		### init message scrn
-		self.message_panel = message_panel()
+		self.message_panel = messagepanel.message_panel()
 
 	def update_view(self):
 		self.world.view(self)

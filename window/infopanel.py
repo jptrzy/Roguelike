@@ -2,7 +2,7 @@
 import math
 
 from bearlibterminal import terminal
-from windowmod import *
+from windows import *
 from message import *
 
 class info_panel(object):

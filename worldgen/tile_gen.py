@@ -1,6 +1,6 @@
 import string
 import random
-import tiles
+from tiles_data import tiles
 
 def rand3(c1, c2, c3):
 	x = random.randint(1, 3)

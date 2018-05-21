@@ -1,5 +1,5 @@
 import string
-import tiles
+from tiles_data import tiles
 
 class Room(object):
     def __init__(self, width, height, plan):
