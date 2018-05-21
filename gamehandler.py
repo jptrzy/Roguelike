@@ -17,7 +17,8 @@ from timecounter import *
 from window import messagepanel
 from animation import *
 from window import infopanel
-from window import messagepanel
+from window import windows
+from data import generators
 
 import shelve
 
@@ -30,7 +31,7 @@ class Game(object):
 		self.proceed = True
 		# start printing screen
 		self.me.printstats()
-		self.world.view(self)
+		self.world.view()
 
 		self.bg_windows.recalc_borders()
 		self.bg_windows.print_borders()
@@ -43,7 +44,7 @@ class Game(object):
 		self.message_panel.custom_add_phrase([('Press', [150,150,150]), ('\\', [255,255,255]), ('to input', [150,150,150]), ('wizard', [112, 45, 206]), ('commands.^', [150,150,150])])
 		self.message_panel.print_messages()
 
-		self.world.view(self)
+		self.world.view()
 		
 #		while True:
 #			if terminal.has_input():
@@ -65,6 +66,8 @@ class Game(object):
 	def start_game(self, preferences):
 		self.preferences = preferences
 		# assume game has already loaded/created
+
+		# initialize windows
 		self.world.recalc_win(self.preferences.w_ylen, self.preferences.w_xlen)
 		self.me.window_init(self.preferences.w_ylen, self.preferences.w_xlen)
 		self.all_mobs.recalc_visible_mobs(self)
@@ -90,9 +93,21 @@ class Game(object):
 
 		self.mainloop()
 
-	def gen_new_game(self):
+	def gen_new_game(self, preferences):
+		terminal.clear()
+		terminal.refresh()
+
+		self.preferences = preferences
+
+		# initialize object generators
+		self.tile_generator = generators.tile_generator(self)
+		self.aura_generator = generators.aura_generator(self)
+		self.mob_generator = generators.mob_generator(self)
+		self.tile_generator.re_path("./data/tiles.json")
+		self.mob_generator.re_path("./data/mobs.json")
+
 		### generate new world
-		self.world = chunk.worldmap(100, 100, 'World')
+		self.world = chunk.worldmap(self, 100, 100, 'World')
 		self.world.initworld()
 
 		### init FOV handler
@@ -108,8 +123,16 @@ class Game(object):
 		### create new character
 		self.all_mobs = mobs.mob_group()
 
-		player_tile = tiles.tile('@', [200, 200, 200], True, False, 'This is you.', 'mobs')
-		self.me = character.character('bobb', player_tile, 100, 100, 20, 100, 100, 100, 100, False)
+		while True:
+			player_name_prompt = windows.text_input_popup("Enter your name:", preferences.w_ylen, preferences.w_xlen)
+			player_name = player_name_prompt.init()
+			if player_name:
+				break
+
+		player_tile = tiles.tile(name=player_name, plural=player_name, icon='@', description='This is you.', color=[200,200,200], world_layer='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
+		self.me = character.character(name='Player', plural='Players', description='This is you.', 
+			      health=100, speed=100, sight_range=25, stamina=100, hunger=100, thirst=100, mana=100,
+			      ethereal=False, tile=player_tile, aura=None, emit=False)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)
@@ -125,7 +148,7 @@ class Game(object):
 		self.message_panel = messagepanel.message_panel()
 
 	def update_view(self):
-		self.world.view(self)
+		self.world.view()
 		self.all_mobs.print_mob_data(self)
 
 	def recalc_input(self, time_amount):
@@ -136,7 +159,7 @@ class Game(object):
 		#p self.world.start_time = time.clock()
 		#p total_view_time_start = time.clock()
 		#p FOV_time, render_time, print_time = self.world.view(self)
-		self.world.view(self)
+		self.world.view()
 		#p total_render_time = FOV_time+render_time+print_time
 		self.all_mobs.print_mob_data(self)
 		self.timer.vprint()

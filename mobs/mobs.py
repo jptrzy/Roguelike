@@ -10,9 +10,12 @@ from include import randomGen
 import action
 
 from window import windows
+import json
 
 class stat(object):
 	def __init__(self, max_amt, buffs=[], multipliers=[]):
+		# initially start at max
+		self.value = max_amt
 		self.raw_max = max_amt
 		self.buffs = buffs
 		self.multipliers = multipliers
@@ -21,23 +24,21 @@ class stat(object):
 
 
 	def recalc_max(self):
-		self.max = self.raw_max
+		self.value = self.raw_max
 
 		for add in self.buffs:
-			self.max += add 
+			self.value += add 
 
 		for multiplier in self.multipliers:
-			self.max = self.max * self.multipliers
+			self.value = self.raw_max * multiplier
 
-		self.max = int(math.floor(self.max))
+		self.value = int(math.floor(self.value))
 
 class dynamic_stat(stat):
 	def __init__(self, max_amt, color_info, regen_rate=1, buffs=[], multipliers=[]):
 		stat.__init__(self, max_amt, buffs, multipliers)
+		self.max = max_amt
 		self.color_info = color_info
-		# initially start at max
-		self.value = self.max
-
 		self.regen_rate = regen_rate
 
 	def alter(self, amount):
@@ -63,16 +64,25 @@ class dynamic_stat(stat):
 
 
 class living(object):
-	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, emit=False, go_thru_walls=False, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
+	def __init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana,
+			     ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
 		self.name = name
-		self.tile = tile
-		self.desc = self.tile.examine
+		self.plural = plural
+		self.description = description
 		self.speed = stat(speed)
 		self.sight_range = stat(sight_range)
-		self.sight_border_requirement = sight_border_requirement
-		self.detect_glow_str = detect_glow_str
-		self.detect_glow_range = detect_glow_range
 		
+		self.tile = tile
+		self.aura = aura
+		self.emit = emit
+
+		# minimum amount of lighting required to see at sight range of mob
+		self.sight_border_requirement = stat(sight_border_requirement)
+		# pseudo glow from mob based on how far they can see into the dark
+		self.detect_glow_str = stat(detect_glow_str) 
+		# maximum distance where pseudo glow will still be considered
+		self.detect_glow_range = stat(detect_glow_range)
+
 		# dynamic stats
 		self.health = dynamic_stat(health, ([255, 0, 0], [255, 91, 91], [35, 0, 0]))
 		self.mana = dynamic_stat(mana, ([43, 131, 255], [84, 175, 255], [0, 34, 89]))
@@ -83,7 +93,7 @@ class living(object):
 		self.dynam_stats = [self.health, self.mana, self.stamina, self.hunger, self.thirst]
 
 		self.emit = emit
-		self.go_thru_walls = go_thru_walls
+		self.ethereal = ethereal
 
 		for dynam_stat in self.dynam_stats:
 			for n in range(3):
@@ -92,7 +102,7 @@ class living(object):
 
 	def move_to_cord(self, y, x):
 		if not (y, x) in self.group.mob_lib:
-			if (self.go_thru_walls) or ((not self.go_thru_walls) and (self.worldmap.check_passable(y, x))):
+			if (self.ethereal) or ((not self.ethereal) and (self.worldmap.check_passable(y, x))):
 				self.remove()
 				self.add(y, x)
 				if self.emit:
@@ -118,9 +128,9 @@ class living(object):
 		self.FOV = FOV
 		#check if place is spawnable
 		if not (y, x) in self.group.mob_lib:
-			if (self.go_thru_walls) or ((not self.go_thru_walls) and (self.worldmap.check_passable(y, x))):
+			if (self.ethereal) or ((not self.ethereal) and (self.worldmap.check_passable(y, x))):
 				if self.emit:
-					self.aura = self.tile.aura_maker.create_aura(self.worldmap, self.worldmap.aura_group, self.worldmap.glow_coords, self.FOV)
+					self.aura._init(worldmap, worldmap.aura_group, worldmap.glow_coords, FOV)
 					self.aura._spawn(y, x)
 				
 				self.add(y, x)
@@ -130,20 +140,26 @@ class living(object):
 		return False
 
 	def get_sight_requirement(self, distance_from_mob):
-		return float(self.sight_border_requirement/self.sight_range.max)*distance_from_mob
+		# requirement to see
+		return float(self.sight_border_requirement.value/self.sight_range.value)*distance_from_mob
 
 	def get_detect_glow_str(self, distance_from_mob):
-		if distance_from_mob > self.detect_glow_range:
+		if distance_from_mob > self.detect_glow_range.value:
 			return 0
-		return -(float(self.detect_glow_str)/self.detect_glow_range)*distance_from_mob + self.detect_glow_str
+		return -(float(self.detect_glow_str.value)/self.detect_glow_range.value)*distance_from_mob + self.detect_glow_str.value
 
 class mob(living):
-	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, determined, emit=False, pathfinding=True):
-		living.__init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, emit)
-		self.hostile = hostile
-		self.sense = sense
-		self.determined = determined # max number of checks in pathfinding
+	def __init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana, sense_range, 
+		         determined, pathfinding, hostile, ethereal, tile, aura, emit, 
+		         sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
+		living.__init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana,
+			            ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range)
+
+		self.sense_range = stat(sense_range)
+		self.determined = stat(determined) # max number of checks in pathfinding
 		self.pathfinding = pathfinding
+		self.hostile = hostile
+
 		self.can_move = True
 
 		self.noise_gen = randomGen.randomGenerator(scale=20)
@@ -185,20 +201,21 @@ class mob(living):
 		if self.can_move:
 			d_from_player = math.floor(((self.y - game.me.y)**2 + (self.x - game.me.x)**2)**0.5)
 
-			if (d_from_player <= self.sense) or (d_from_player <= self.sight_range and bresenham.check_line((self.y, self.x), (game.me.y, game.me.x), game.world.blockable_coordinates)):
-				if d_from_player <= 1.5:
-					action.a_testAttack.prep(self, game.timer.time)
-					self.action_args = (self, game.me.y, game.me.x, self.mob_group.mob_lib)
+			if (d_from_player <= self.sense_range.value) or (d_from_player <= self.sight_range and bresenham.check_line((self.y, self.x), (game.me.y, game.me.x), game.world.blockable_coordinates)):
+				if game.world.check_enough_light((self.y, self.x), d_from_player, self):			
+					if d_from_player <= 1.5:
+						action.a_testAttack.prep(self, game.timer.time)
+						self.action_args = (self, game.me.y, game.me.x, self.mob_group.mob_lib)
 
-					return
-				else:	
-					if self.pathfinding:
-						self.path = a_star.pathfind.find_path((self.y, self.x), (game.me.y, game.me.x), game.world, self.determined)
-						if self.path:
-							self.action_args = (self, self.path[1][0], self.path[1][1]) # replace y, x
-							action.a_Walk.prep(self, game.timer.time)
+						return
+					else:	
+						if self.pathfinding:
+							self.path = a_star.pathfind.find_path((self.y, self.x), (game.me.y, game.me.x), game.world, self.determined.value)
+							if self.path:
+								self.action_args = (self, self.path[1][0], self.path[1][1]) # replace y, x
+								action.a_Walk.prep(self, game.timer.time)
 
-							return
+								return
 
 		# wander
 		wander_direction = self.noise_gen.get_closest_direction(self.y, self.x)
@@ -206,8 +223,8 @@ class mob(living):
 
 		action.a_Walk.prep(self, game.timer.time)
 
-	def mob_spawn(self, y, x, worldmap, FOV, mob_group, time):
-		if self.spawn(y, x, worldmap, FOV, mob_group):
+	def spawn(self, y, x, worldmap, FOV, mob_group, time):
+		if super(mob, self).spawn(y, x, worldmap, FOV, mob_group):
 
 			self.mob_group = mob_group
 
@@ -223,6 +240,10 @@ class mob(living):
 			self.mob_group.mob_set.add(self)
 
 			self.next_update_time = time
+
+			return True
+
+		return False
 
 	def re_add_chunk_group(self):
 		self.mapy = self.worldmap.get_mapy(self.y)
@@ -253,15 +274,6 @@ class mob(living):
 			self.aura._remove()
 		self.mob_group.update(game)
 
-class mob_maker(mob):
-	def __init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, determined, emit=False, pathfinding=True):
-		mob.__init__(self, name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, determined, emit, pathfinding)
-
-	def create(self, y, x, worldmap, FOV, mob_group, time):
-		new_mob = mob(self.name, self.tile, self.health.max, self.speed.max, self.sight_range.max, self.stamina.max, self.hunger.max, self.thirst.max, self.mana.max, self.hostile, self.sense, self.determined, self.emit, self.pathfinding)
-		new_mob.mob_spawn(y, x, worldmap, FOV, mob_group, time)
-		return new_mob
-
 class mob_group(object):
 	def __init__(self):
 		self.mobs = {}
@@ -285,7 +297,7 @@ class mob_group(object):
 				for mob in self.mobs[game.me.mapy + coord_check[0], game.me.mapx + coord_check[1]]:
 					if (mob.y, mob.x) in game.world.visible_coords:
 						mob.distance_from_player = game.world.distance_map[(mob.y, mob.x)]
-						if game.world.get_glow_str(game, (mob.y, mob.x), game.timer.day_night_emit_str(), mob.distance_from_player, game.me) >= game.me.get_sight_requirement(mob.distance_from_player):
+						if game.world.get_glow_str((mob.y, mob.x), mob.distance_from_player, game.me) >= game.me.get_sight_requirement(mob.distance_from_player):
 							self.visible_mobs.append(mob)
 			except KeyError:
 				pass
@@ -334,19 +346,3 @@ class mob_group(object):
 				pass
 
 		return len(self.active_mobs)
-
-#name, tile, health, speed, sight_range, stamina, hunger, thirst, mana, hostile, sense, emit=False, pathfinding=True
-test_mob_tile = tiles.tile(u'T', [255,99,71], False, False, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus varius pharetra finibus. Fusce ac vehicula massa, eu dapibus leo. Praesent viverra, urna vitae tempus mattis, nisi felis venenatis ligula, ac tempus eros mi at orci. Aenean luctus auctor erat, non ornare elit mattis quis. Quisque eget mi in ligula consequat mattis. Sed tempor faucibus risus vitae ultricies. Integer at mauris ex. Praesent in nisl orci. Vivamus in placerat risus, vitae elementum neque. Nunc porta sapien sit amet orci efficitur, feugiat luctus felis vestibulum. Morbi viverra ante sed lectus imperdiet, at ornare ipsum mattis. Ut metus sapien, convallis eu porta et, volutpat a tellus. Suspendisse justo tortor, interdum quis elit eget, dictum consectetur felis. Ut vestibulum ultricies tortor. Nunc vitae neque bibendum, dignissim nulla egestas, consequat orci.', world_layer = 'mobs')
-test_mob = mob_maker(name='a test mob', tile=test_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, determined=300)
-
-test_light_mob_tile = tiles.light_tile(u'L', [0,0,0], False, False, 'a test light mob', True, 3, [249, 173, 34], 500, 0.5, world_layer='mobs')
-test_light_mob = mob_maker(name='testlightmob1', tile=test_light_mob_tile, health=100, speed=100, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, determined=300, emit=True)
-
-test_speed_mob_tile = tiles.tile(u'ጿ', [142, 185, 255], False, False, 'a test speed mob', world_layer='mobs')
-test_speed_mob = mob_maker(name='test speed mob', tile=test_speed_mob_tile, health=100, speed=200, sight_range=20, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=10, determined=300)
-
-blind_mob_tile = tiles.tile('B', [142, 185, 255], False, False, 'a blind mob', world_layer = 'mobs')
-test_blind_mob = mob_maker(name='blind test mob', tile=blind_mob_tile, health=100, speed=50, sight_range=3, stamina=100, hunger=100, thirst=100, mana=100, hostile=True, sense=5, determined=100)
-
-determined_mob_tile = tiles.tile("D", [255, 0, 0], False, False, 'a determined mob', world_layer = 'mobs')
-test_determined_mob = mob_maker(name='determined mob', tile=determined_mob_tile, health=100,speed=100,sight_range=100,stamina=100,hunger=100,thirst=100,mana=100,hostile=True,sense=100, determined=10000)

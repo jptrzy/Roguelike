@@ -13,6 +13,7 @@ def linear_gradient(start_color, end_color, n):
     return color_list
 
 def blend(colors, strength):
+    # colors must be RGB, not ARGB
     # blend( [color1, color2, ... ] , [color1str, color2str, ... ]    )
     total_str = 0
     

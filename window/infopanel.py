@@ -29,8 +29,7 @@ class info_panel(object):
 			visible = False
 			if (y, x) in game.world.visible_coords:
 				distance_from_player = game.world.distance_map[(y, x)]
-				if game.world.get_glow_str(game, (y, x), game.timer.day_night_emit_str(), distance_from_player, game.me) >= game.me.get_sight_requirement(distance_from_player):
-					
+				if game.world.check_enough_light((y, x), distance_from_player, game.me):
 					# print info
 					self.prepare_tile_info(y, x, game.world)
 
@@ -149,7 +148,7 @@ class info_panel(object):
 		for print_layer in print_info:
 			print_message = [(print_layer+":", (255,255,255))]
 			for tile in print_info[print_layer]:
-				print_message.append((tile.examine, tile.color))
+				print_message.append((tile.description, tile.color))
 
 			s_add_message(custom_convert_phrase_to_list(print_message), self.window.xlen-1, self.add_new_row)
 
@@ -164,12 +163,12 @@ class info_panel(object):
 		s_add_message(health_bar, self.window.xlen-1, self.add_new_title_row)
 		s_add_message(convert_phrase_to_list(self.line), self.window.xlen, self.add_new_title_row)
 
-		s_add_message(convert_phrase_to_list(mob.tile.examine), self.window.xlen-1, self.add_new_row)
+		s_add_message(convert_phrase_to_list(mob.description), self.window.xlen-1, self.add_new_row)
 
 		self.output_length = self.title_length + self.body_length
 
 	def _print(self, game):
-		game.world.view_move(game, self.check_y, self.check_x)
+		game.world.view_move(self.check_y, self.check_x)
 		game.world.print_indicator(self.check_y, self.check_x)
 
 		if not self.scroll_input:

@@ -50,13 +50,13 @@ class commands_handler(object):
 			newy = game.me.y + self.move[uinput][0]
 			newx = game.me.x + self.move[uinput][1]
 
-			if game.world.check_passable(newy, newx):
+			if game.world.check_passable(newy, newx) or uinput == terminal.TK_R:
 				if self.shift_on:
 					move_action = action.a_Sprint
 				else:
 					move_action = action.a_Walk
 
-				game.update(move_action._calc_prep_time(game.me.speed.max))
+				game.update(move_action._calc_prep_time(game.me.speed.value))
 
 				if game.world.check_passable(newy, newx):
 					game.me.remove()
@@ -66,14 +66,13 @@ class commands_handler(object):
 
 					game.world.recalcloc(game.me.mapy, game.me.mapx)
 				
-					if uinput != terminal.TK_KP_5:
-						game.me.stamina.alter(-move_action.stamina_cost)
+					game.me.stamina.alter(-move_action.stamina_cost)
 
 				else:
 					game.message_panel.add_phrase('Something blocked your path!', [255,0,0])
 					game.message_panel.print_messages()
 
-				game.update(move_action._calc_recover_time(game.me.speed.max))
+				game.update(move_action._calc_recover_time(game.me.speed.value))
 
 				game.update_screen()
 
@@ -94,9 +93,9 @@ class commands_handler(object):
 			type_of_construct = terminal.read()
 
 			construct_lib = {
-			terminal.TK_W : tiles.wall_wood,
-			terminal.TK_G : tiles.gray_glass,
-			terminal.TK_M : tiles.test_multi_tile
+			terminal.TK_W : "black block",
+			terminal.TK_G : "gray glass",
+			terminal.TK_M : "example layered tile"
 			}
 
 			try:
@@ -104,10 +103,10 @@ class commands_handler(object):
 				dir = terminal.read()
 			except KeyError:
 				dir = type_of_construct
-				construct = tiles.black_block
+				construct = "black block"
 			
-			if game.world.layers.add_tile(game.me.y + self.move[dir][0], game.me.x + self.move[dir][1], construct):
-				game.message_panel.add_phrase('Placed ' + construct.examine.lower(), [255,255,255])
+			if game.tile_generator.create_tile(construct, game.me.y + self.move[dir][0], game.me.x + self.move[dir][1]):
+				game.message_panel.add_phrase('Placed ' + game.tile_generator.tiles_data[construct]["name"]+'.', [255,255,255])
 			else:
 				game.message_panel.add_phrase('Error placing construct.', [255,0,0])
 			game.message_panel.print_messages()
@@ -132,15 +131,19 @@ class commands_handler(object):
 			if not self.shift_on:
 				type_of_mob = terminal.read()
 				if type_of_mob == terminal.TK_1:
-					mobs.test_mob.create(game.me.y + 4, game.me.x, game.world, game.FOV, game.all_mobs, game.timer.time)
+					create_mob = "test mob"
 				elif type_of_mob == terminal.TK_2:
-					mobs.test_light_mob.create(game.me.y + 4, game.me.x, game.world, game.FOV, game.all_mobs, game.timer.time)
+					create_mob = "test speed mob"
 				elif type_of_mob == terminal.TK_3:
-					mobs.test_speed_mob.create(game.me.y + 8, game.me.x, game.world, game.FOV, game.all_mobs, game.timer.time)
+					create_mob = "test light mob"
 				elif type_of_mob == terminal.TK_4:
-					mobs.test_blind_mob.create(game.me.y + 8, game.me.x, game.world, game.FOV, game.all_mobs, game.timer.time)
+					create_mob = "test blind mob"
 				elif type_of_mob ==terminal.TK_5:
-					mobs.test_determined_mob.create(game.me.y + 8, game.me.x, game.world, game.FOV, game.all_mobs, game.timer.time)
+					create_mob = "test determined mob"
+				else:
+					create_mob = "test mob"
+
+				game.mob_generator.create_mob(create_mob, game.me.y + 8, game.me.x)
 			else:
 				for chunk in game.all_mobs.mobs.values():
 					for mob in chunk:
@@ -152,18 +155,17 @@ class commands_handler(object):
 				type_of_torch = terminal.read()
 				break
 			if type_of_torch == terminal.TK_R:
-				torch = tiles.torch
+				torch_id = "torch"
 			elif type_of_torch == terminal.TK_B:
-				torch = tiles.torch_blue
+				torch_id = "blue torch"
 			while not terminal.has_input():
 				dir = terminal.read()
 				break
+
 			torchy = game.me.y + self.move[dir][0]
 			torchx = game.me.x + self.move[dir][1]
 
-			if game.world.layers.add_tile(torchy, torchx, torch):
-				new_aura=torch.aura_maker.create_aura(game.world, game.world.aura_group, game.world.glow_coords, game.FOV)
-				new_aura._spawn(torchy, torchx)
+			game.tile_generator.create_tile(torch_id, torchy, torchx)
 
 			game.update_screen()
 
@@ -174,7 +176,7 @@ class commands_handler(object):
 			game.info_panel.open(game.bg_windows)
 			game.info_panel.prompt(game, check_y, check_x)
 			game.info_panel.exit(game.bg_windows)
-			game.world.view(game)
+			game.world.view()
 			terminal.refresh()
 
 		elif uinput == terminal.TK_H:
@@ -206,7 +208,7 @@ class commands_handler(object):
 
 				attack_action = action.a_smite
 
-				game.update(attack_action._calc_prep_time(game.me.speed.max))
+				game.update(attack_action._calc_prep_time(game.me.speed.value))
 				
 				if game.me.stamina.value >= attack_action.stamina_cost:
 					attack_action.do(game, game.me, attack_y, attack_x, game.all_mobs.mob_lib)
@@ -215,7 +217,7 @@ class commands_handler(object):
 					game.message_panel.add_phrase("Not enough stamina!")
 					game.message_panel.print_messages()
 				
-				game.update(attack_action._calc_recover_time(game.me.speed.max))
+				game.update(attack_action._calc_recover_time(game.me.speed.value))
 
 				game.update_screen()
 

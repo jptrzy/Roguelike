@@ -1,0 +1,109 @@
+{
+	"error tile" : {
+		"name" : "error tile",
+		"plural" : "error tiles",
+		"icon" : "?",
+		"description" : "Placeholder tile in case tile loading failed.",
+		"color" : [255,0,0],
+		"world layer" : "terrain",
+		"flags" : []
+	},
+
+	"empty dot" : {
+		"name" : "empty space",
+		"plural" : "empty space",
+		"icon" : ".",
+		"description" : "Empty space represented by a dot. A tile used for debugging.",
+		"color" : [240,255,255],
+		"world layer" : "terrain",
+		"flags" : []
+	},
+
+	"empty block" : {
+		"name" : "empty space",
+		"plural" : "empty space",
+		"icon" : "█",
+		"description" : "Empty space represented by a block. A tile used for debugging.",
+		"color" : [240,255,255],
+		"world layer" : "terrain",
+		"flags" : []
+	},
+
+	"example layered tile" : {
+		"name" : "example layered tile",
+		"plural" : "example layered tiles",
+		"icon" : "%",
+		"description" : "An example tile that can be placed 10 times within a single coordinate. A tile used for debugging.",
+		"color" : [240,0,20],
+		"world layer" : "example objects",
+		"flags" : []
+	},
+	
+	"dim torch" : {
+		"name" : "dim torch",
+		"plural" : "dim torches",
+		"icon" : "*",
+		"description" : "A dim torch.",
+		"color" : [249,173,34],
+		"world layer" : "constructs",
+		"flags" : [],
+		"aura" : {
+			"glow_color" : [249,173,34],
+			"glow_range" : 3,
+			"glow_strength" : 1000, 
+			"glow_color_strength" : 0.6
+		}
+	},
+
+	"torch" : {
+		"name" : "torch",
+		"plural" : "torches",
+		"icon" : "*",
+		"description" : "A torch.",
+		"color" : [249,125,34],
+		"world layer" : "constructs",
+		"flags" : [],
+		"aura" : {
+			"glow_color" : [249,173,34],
+			"glow_range" : 8,
+			"glow_strength" : 1000, 
+			"glow_color_strength" : 0.6
+		}
+	},
+
+	"blue torch" : {
+		"name" : "blue torch",
+		"plural" : "blue torches",
+		"icon" : "*",
+		"description" : "A blue torch.",
+		"color" : [249,125,34],
+		"world layer" : "constructs",
+		"flags" : [],
+		"aura" : {
+			"glow_color" : [69,152,224],
+			"glow_range" : 8,
+			"glow_strength" : 1000, 
+			"glow_color_strength" : 0.6
+		}
+	},
+
+	"black block" : {
+		"name" : "black block",
+		"plural" : "black blocks",
+		"icon" : "█",
+		"description" : "A non passable and sight blockable black block. A tile used for debugging.",
+		"color" : [0,0,0],
+		"world layer" : "constructs",
+		"flags" : ["BLOCKS_PATH", "BLOCKS_SIGHT"]
+	},
+
+	"gray glass" : {
+		"name" : "gray glass",
+		"plural" : "gray glass",
+		"icon" : "█",
+		"description" : "A non passable gray block. A tile used for debugging.",
+		"color" : [200,100,100,100],
+		"world layer" : "constructs",
+		"flags" : ["BLOCKS_PATH"]
+	}
+}

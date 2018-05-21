@@ -2,37 +2,25 @@
 import math
 from include import gradient
 import copy
+import json
 
 class tile(object):
-	def __init__(self, icon, color, passable, blockable, examine, world_layer, weather_sens = False, ghost_tile = False):
+	def __init__(self, name, plural, icon, description, color, world_layer, blocks_sight=False, blocks_path=False, ethereal=False):
+		self.name = name
+		self.plural = plural
 		self.icon = icon
-
+		self.description = description
 		self.color = color
-
-		self.passable = passable
-		self.blockable = blockable
-		self.examine = examine
-
 		self.worldlayer_name = world_layer
 
-		self.weather_sens = weather_sens
-		self.ghost_tile = ghost_tile
-
-	def _create(self):
-		new_tile = tile(self.icon, self.color, self.passable, self.blockable, self.examine, self.world_layer, self.weather_sens, self.ghost_tile)
-		return new_tile
-
-class light_tile(tile):
-	def __init__(self, icon, color, passable, blockable, examine, glow, glow_range, glow_color, glow_str, glow_color_str, world_layer, weather_sens = False, ghost_tile=False):
-		tile.__init__(self, icon, color, passable, blockable, examine, world_layer, weather_sens, ghost_tile)
-
-		self.aura_maker = aura_maker(glow, glow_range, glow_color, glow_str, glow_color_str)
+		self.blocks_sight = blocks_sight
+		self.blocks_path = blocks_path
+		self.ethereal = ethereal
 
 class aura(object):
-	def __init__(self, glow, glow_range, glow_color, glow_str, glow_color_str):
-		self.glow = glow
-		self.glow_range = glow_range
+	def __init__(self,  glow_color, glow_range, glow_str, glow_color_str):
 		self.glow_color = glow_color
+		self.glow_range = glow_range
 		self.glow_str = glow_str
 		self.glow_color_str = glow_color_str
 
@@ -112,19 +100,17 @@ class aura(object):
 				self.blockable_data[glow_aff_tile_coord] = data
 
 	def _recalc_distance_map(self):
-		if self.glow:
-			glowtopy = self.y - self.glow_range
-			glowtopx = self.x - self.glow_range
+		glowtopy = self.y - self.glow_range
+		glowtopx = self.x - self.glow_range
 
-			self.g_distance_map = {}
+		self.g_distance_map = {}
 
-			for i in range(-1, self.glow_range*2 + 2):
-				for n in range(-1, self.glow_range*2 + 2):
-					self.g_distance_map[(glowtopy + i, glowtopx + n)] = math.hypot(self.x - glowtopx - n, self.y - glowtopy - i)
+		for i in range(-1, self.glow_range*2 + 2):
+			for n in range(-1, self.glow_range*2 + 2):
+				self.g_distance_map[(glowtopy + i, glowtopx + n)] = math.hypot(self.x - glowtopx - n, self.y - glowtopy - i)
 
 	def _cast_light(self): # use when opaque tile moves; must use _recalc_distance_map when source moves as well
-		if self.glow:
-			self.glow_aff_tiles_coords = self.FOV.Calculate_Sight(self.worldmap.blockable_coordinates, self.y, self.x, self.glow_range, self.g_distance_map)
+		self.glow_aff_tiles_coords = self.FOV.Calculate_Sight(self.worldmap.blockable_coordinates, self.y, self.x, self.glow_range, self.g_distance_map)
 
 	def _move(self, y, x):
 		self._remove_effect()
@@ -182,7 +168,11 @@ class glow_aff_dict(object):
 					colors.append(currentsource.glow_color)
 					strengths.append(currentsource_color_str)
 
-		colors.append(tile_color)
+		if len(tile_color) == 4:
+			colors.append((tile_color[1], tile_color[2], tile_color[3]))
+		else:
+			colors.append(tile_color)
+
 		strengths.append(blend_tile_color_strength)
 
 		new_color = gradient.blend(colors, strengths)
@@ -192,6 +182,9 @@ class glow_aff_dict(object):
 
 		for i in range(3):
 			new_color[i] = int(new_color[i] * dark_factor)
+
+		if len(tile_color) == 4:
+			new_color.insert(0, tile_color[0])
 
 		return new_color
 
@@ -204,62 +197,10 @@ class glow_aff_dict(object):
 				glow_str += currentsource.glow_str - glow_distance*(currentsource.glow_str / currentsource.glow_range)
 		return glow_str
 
-class aura_maker(aura):
-	def __init__(self, glow, glow_range, glow_color, glow_str, glow_color_str):
-		aura.__init__(self, glow, glow_range, glow_color, glow_str, glow_color_str)
-
-	def create_aura(self, worldmap, aura_group, glow_coords, FOV):
-		new_aura = aura(self.glow, self.glow_range, self.glow_color, self.glow_str, self.glow_color_str)
-		new_aura._init(worldmap, aura_group, glow_coords, FOV)
-
-		return new_aura
-
-"""
-World layers (from lowest to highest):
-- terrain
-- constructs
-- mobs
-"""
 
 #Misc
-player = light_tile('@', [71, 71, 71], True, False, 'You.', True, 10, [0,0,0], 500, 0, world_layer='terrain')
-space = tile('.', [240,255,255], True, False, 'Empty space.', world_layer='terrain')
-empty = tile(u'█', [240,255,255], True, False, 'Empty space.', world_layer='terrain')
-test_multi_tile = tile('%', [240,0,20], True, False, 'Example object.', world_layer='example objects')
-
-#Vegetation
-grass_tile = tile('.', [50,205,50], True, False, 'Grass.', weather_sens = True, world_layer='constructs')
-short_grass = tile(',', [0,128,0], True, False, 'Short blades of grass.', weather_sens = True, world_layer='constructs')
-tall_grass = tile('/', [0,100,0], True, False, 'Tall, view-obstructing grass.', world_layer='constructs')
-short_tree = tile(u'ŧ', [127,255,0], True, False, 'A short but sturdy tree.', world_layer='constructs')
-tall_tree = tile(u'Ŧ', [34,139,34], False, True, 'A tall, impassible tree.', world_layer='constructs')
-
-mrock = tile('#', [217,224,195], True, False, 'Strong and sturdy mountain rock.', world_layer='constructs')
-largerock = tile('#', [125,136,127], False, True, 'Tall and cragged rock.', world_layer='constructs')
-
-
-#Light and aura
-
-	#def __init__(self, icon, color, passable, blockable, examine, glow, glow_range, glow_color, glow_str, glow_color_str, tile_type = 'terrain', weather_sens = False):
-
-torch_dim = light_tile('*', [249,125,34], True, False, 'A dim torch.', True, 3, [249, 173, 34], 1000, 0.6, world_layer='constructs')
-torch = light_tile('*', [249,125,34], True, False, 'A bright torch.', True, 8, [249, 173, 34], 1000, 0.6, world_layer='constructs')
-torch_blue = light_tile('*', [69,152,224], True, False, 'A bright blue torch.', True, 8, [69,152,224], 1000, 0.6, world_layer='constructs')
-
-#Constructs
-black_block = tile(u'█', [0,0,0], False, True, 'black block 0 0 0 non passable and blockable', world_layer='constructs')
-
-floor_wood = tile('.', [193,154,107], True, False, 'Wooden flooring.', world_layer='constructs')
-
-wall_wood = tile('#', [102, 51, 0], False, True, 'Wooden walls.', world_layer='constructs')
-wall_stone = tile('#', [204, 204, 204], False, True, 'A sturdy stone wall.', world_layer='constructs')
-
-gray_glass = tile(u'█', [100,100,100], False, False, 'Gray glass.', world_layer='constructs')
-
-bed = tile('b', [245,245,220], True, False, 'A ragged and sloppy bed.', world_layer='constructs')
-fire_home = light_tile('f', [255,69,0], False, False, 'A low, hearthy fire.', True, 3, [252, 122, 30], 1000, 1000, world_layer='constructs')
-wooden_door = tile('+', [102, 51, 0], False, True, 'A closed wooden door. It creaks with age.', world_layer='constructs')
-open_wooden_door = tile('-', [102, 51, 0], True, False, 'An open wooden door. Beware of unexpected visitors.', world_layer='constructs')
+# move player to a separate json file
+# player = light_tile('@', [71, 71, 71], True, False, 'You.', True, 10, [0,0,0], 500, 0, world_layer='terrain')
 
 #Worldmap Chunk tiles
 class chunktile(object):

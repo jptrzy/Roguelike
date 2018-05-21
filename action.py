@@ -13,7 +13,7 @@ class Action(object):
 		return float(self.recover_time) / (float(speed) / 100)
 
 	def prep(self, mob, current_time):
-		mob.next_update_time = current_time + self._calc_prep_time(mob.speed.max)
+		mob.next_update_time = current_time + self._calc_prep_time(mob.speed.value)
 		mob.current_action = self
 		mob.update_stage = 1
 
@@ -26,7 +26,7 @@ class Movement_Action(Action):
 		mob.move_to_cord(y, x)
 		mob.stamina.alter(-self.stamina_cost)
 		mob.update_stage = 2
-		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.max)
+		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
 
 class Idle_Action(Action):
 	def __init__(self):
@@ -34,7 +34,7 @@ class Idle_Action(Action):
 
 	def do(self, game, mob):
 		mob.update_stage = 2
-		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.max)
+		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
 
 class Attack(Action):
 	def __init__(self, cast_time, recover_time, stamina_cost, damage):
@@ -54,7 +54,7 @@ class Attack(Action):
 			successful = False # -----------------------------------------------        
 
 		mob.update_stage = 2
-		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.max)
+		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
 
 		game.update_screen()
 

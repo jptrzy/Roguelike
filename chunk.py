@@ -83,10 +83,10 @@ class layer_tracker(object):
 			successful = False
 		else:
 			# worldlayer able to store object, now check other conditions
-			if (not tile.ghost_tile) and (not self.worldmap.check_passable(y, x)):
+			if (not tile.ethereal) and (not self.worldmap.check_passable(y, x)):
 				successful = False
 			else:
-				# tile able to be placed.
+				# tile able to be placed
 				try:
 					self.tiles[(y, x)].append(tile)
 				except KeyError:
@@ -124,7 +124,8 @@ class layer_tracker(object):
 			return None
 
 class worldmap(object):
-	def __init__(self, ylen, xlen, gametype):
+	def __init__(self, game, ylen, xlen, gametype):
+		self.game = game
 		self.ylen = ylen
 		self.xlen = xlen
 		self.radius = ylen/2
@@ -134,7 +135,6 @@ class worldmap(object):
 		self.w_xlen = 46#96   #160
 
 		self.worldmap = []
-		self.dmap = []
 		self.tmap = []
 		self.cmap = []
 
@@ -192,7 +192,6 @@ class worldmap(object):
 		### init grid
 		for y in range(self.ylen):
 			self.worldmap.append([[] for i in range(self.xlen)])
-			self.dmap.append([[] for i in range(self.xlen)])
 			self.tmap.append([[] for i in range(self.xlen)])
 			self.cmap.append([[] for i in range(self.xlen)])
 		
@@ -231,19 +230,6 @@ class worldmap(object):
 							break
 						else:
 							self.worldmap[pathy][pathx] = copy.copy(distance_from_center)
-				
-		#defines difficulty tiles
-		for i in range(self.ylen):
-			for x in range(self.xlen):
-				if self.worldmap[i][x] == []:
-					self.dmap[i][x] = [tiles.d0]
-				else:
-					self.dmap[i][x] = [self.newchunk(self.worldmap[i][x])]
-
-		# #### everything else (grass) ####
-		for y in range(self.ylen):
-		 	for x in range(self.xlen):
-		 		self.tmap[y][x].append(tiles.w_void)
 
 		### init minimap
 		self.minimap = windows.window(31, 30, 60, 60)
@@ -280,7 +266,7 @@ class worldmap(object):
 
 		self.minimap.wprint(31, 0, str(self.tmap[mapy][mapx][0].desc), self.tmap[mapy][mapx][0].color)
 
-	def printview(self, game):
+	def printview(self):
 		#p time_3 = time.clock()
 		self.layers.windows.clear()
 		
@@ -297,15 +283,15 @@ class worldmap(object):
 	def print_indicator(self, y, x, indicator=u'×'):
 		self.layers.top_window.put(y - self.window_top_y, x - self.window_top_x, indicator)
 
-	def recalc_FOV(self, game):
+	def recalc_FOV(self):
 		#p time_1 = time.clock()
 
-		character = game.me
+		character = self.game.me
 
 		locy = character.y
 		locx = character.x
 
-		sight = character.sight_range.max
+		sight = character.sight_range.value
 
 		topy = locy - int(self.w_ylen / 2)
 		topx = locx - int(self.w_xlen / 2)
@@ -319,17 +305,17 @@ class worldmap(object):
 			for n in range(-1, sight*2 + 2):
 				self.distance_map[(rendy + i, rendx + n)] = math.hypot(locx - rendx - n, locy - rendy - i)
 
-		self.visible_coords = game.FOV.Calculate_Sight(self.blockable_coordinates, locy, locx, sight, self.distance_map)
+		self.visible_coords = self.game.FOV.Calculate_Sight(self.blockable_coordinates, locy, locx, sight, self.distance_map)
 
 		
 		#p print("FOV render: --- %s seconds ---" % (time.clock() - time_1))
 
-	def recalc_view(self, game, y, x):
+	def recalc_view(self, y, x):
 		#p time_2 = time.clock()
 
-		sun_color = game.timer.day_night_color()
-		sun_emit_str = game.timer.day_night_emit_str()
-		sun_color_str = game.timer.day_night_color_str()
+		sun_color = self.game.timer.day_night_color()
+		sun_emit_str = self.game.timer.day_night_emit_str()
+		sun_color_str = self.game.timer.day_night_color_str()
 
 		self.window_top_y = y - self.w_ylen / 2
 		self.window_top_x = x - self.w_xlen / 2
@@ -348,16 +334,16 @@ class worldmap(object):
 
 				distance_from_char = self.distance_map[tilecoord]
 
-				glow_strength = self.get_glow_str(game, tilecoord, sun_emit_str, distance_from_char, game.me)
+				glow_strength = self.get_glow_str(tilecoord, distance_from_char, self.game.me)
 
-				if glow_strength >= game.me.get_sight_requirement(distance_from_char):
+				if glow_strength >= self.game.me.get_sight_requirement(distance_from_char):
 					tiles_in_coord = self.layers.get_tiles(tilecoord[0], tilecoord[1])
 					if tiles_in_coord != None:
 						for check_tile in tiles_in_coord:
 							tile_layer_data = []
 							tile_layer_data.append(check_tile)
 
-							new_color = self.glow_coords._reblend(tilecoord, sun_color, amb_color_str, self.amb_emit_str, glow_strength, check_tile.color, game.me.y, game.me.x)
+							new_color = self.glow_coords._reblend(tilecoord, sun_color, amb_color_str, self.amb_emit_str, glow_strength, check_tile.color, self.game.me.y, self.game.me.x)
 
 							tile_layer_data.append(new_color)
 
@@ -368,7 +354,9 @@ class worldmap(object):
 
 		#p print("dynamic lighting: --- %s seconds ---" % (time.clock() - time_2))
 
-	def get_glow_str(self, game, tilecoord, sun_emit_str, distance_from_mob, mob):
+	def get_glow_str(self, tilecoord, distance_from_mob, mob):
+		sun_emit_str = self.game.timer.day_night_emit_str()
+
 		if tilecoord in self.covered:
 			self.amb_emit_str = int(sun_emit_str * self.covered[tilecoord] / 100)
 		else:
@@ -383,22 +371,26 @@ class worldmap(object):
 
 		return glow_strength
 
-	def view(self, game):
+	def check_enough_light(self, tilecoord, distance_from_mob, mob):
+		glow_strength = self.get_glow_str(tilecoord, distance_from_mob, mob)
+		return glow_strength >= mob.get_sight_requirement(distance_from_mob)
+
+	def view(self):
 		#p FOV_time = time.clock()
-		self.recalc_FOV(game)
+		self.recalc_FOV()
 		#p FOV_time = time.clock() - FOV_time
 		#p render_time = time.clock()
-		self.recalc_view(game, game.me.y, game.me.x)
+		self.recalc_view(self.game.me.y, self.game.me.x)
 		#p render_time = time.clock() - render_time
 		#p print_time = time.clock()
-		self.printview(game)
+		self.printview()
 		#p print_time = time.clock() - print_time
 
 		#p print("FOV time: %s \n Render time: %s \n Print view time: %s \n" % (FOV_time, render_time, print_time))
 
-	def view_move(self, game, y, x):
-		self.recalc_view(game, y, x)
-		self.printview(game)
+	def view_move(self, y, x):
+		self.recalc_view(y, x)
+		self.printview()
 
 	def adjacent_by(self, y, x, map):
 		c = [-1, 1]
@@ -438,7 +430,7 @@ class worldmap(object):
 		blocked = False
 		try:
 			for tile in self.layers.tiles[(tiley, tilex)]:
-				if tile.blockable:
+				if tile.blocks_sight:
 					blocked = True
 					break
 		except KeyError:
@@ -456,7 +448,7 @@ class worldmap(object):
 	def check_passable(self, y, x):
 		try:
 			for tile in self.layers.tiles[(y, x)]:
-				if not tile.passable:
+				if tile.blocks_path:
 					return False
 		except KeyError:
 			pass
@@ -484,7 +476,7 @@ class worldmap(object):
 	def initchunk(self, y, x):
 		self.cmap[y][x].append('.')
 
-		tile_gen.chunk(self, y, x)
+		tile_gen.chunk(self, self.game, y, x)
 
 	def get_mapx(self, x):
 		return int(math.floor(x / 100))

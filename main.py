@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
 		if start_game_mode == 'New':
 			game = Game()
-			game.gen_new_game()
+			game.gen_new_game(Preferences)
 		elif start_game_mode == 'Load':
 			load_save = shelve.open(".\saves\\"+start_game_file, 'r')
 			game = load_save['game']

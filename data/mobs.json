@@ -1,0 +1,123 @@
+{
+	"test mob" : {
+		"name" : "test mob",
+		"plural" : "test mobs",
+		"description" : "A standard test mob for debugging. Long description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus varius pharetra finibus. Fusce ac vehicula massa, eu dapibus leo. Praesent viverra, urna vitae tempus mattis, nisi felis venenatis ligula, ac tempus eros mi at orci. Aenean luctus auctor erat, non ornare elit mattis quis. Quisque eget mi in ligula consequat mattis. Sed tempor faucibus risus vitae ultricies. Integer at mauris ex. Praesent in nisl orci. Vivamus in placerat risus, vitae elementum neque. Nunc porta sapien sit amet orci efficitur, feugiat luctus felis vestibulum. Morbi viverra ante sed lectus imperdiet, at ornare ipsum mattis. Ut metus sapien, convallis eu porta et, volutpat a tellus. Suspendisse justo tortor, interdum quis elit eget, dictum consectetur felis. Ut vestibulum ultricies tortor. Nunc vitae neque bibendum, dignissim nulla egestas, consequat orci.",
+		
+		"tile" : {
+			"icon" : "T",
+			"color" : [255,99,71],
+			"flags" : []
+		},
+		
+		"health" : 100,
+		"speed" : 100,
+		"sight range" : 20,
+		"stamina" : 100,
+		"hunger" : 100,
+		"thirst" : 100,
+		"mana" : 100,
+		"sense range" : 10,
+		"determined" : 300,
+		"flags" : []
+	},
+
+	"test light mob" : {
+		"name" : "test light mob",
+		"plural" : "test light mobs",
+		"description" : "A mob with an aura for debugging.",
+
+		"tile" : {
+			"icon" : "L",
+			"color" : [255,99,71],
+			"flags" : []
+		},
+
+		"aura" : {
+			"glow_color" : [249,173,34],
+			"glow_range" : 5,
+			"glow_strength" : 1000, 
+			"glow_color_strength" : 0.6
+		},
+
+		"health" : 100,
+		"speed" : 100,
+		"sight range" : 20,
+		"stamina" : 100,
+		"hunger" : 100,
+		"thirst" : 100,
+		"mana" : 100,
+		"sense range" : 10,
+		"determined" : 300,
+		"flags" : []
+	},
+
+	"test speed mob" : {
+		"name" : "test speed mob",
+		"plural" : "test speed mobs",
+		"description" : "A standard fast mob for debugging.",
+		
+		"tile" : {
+			"icon" : "S",
+			"color" : [142,185,255],
+			"flags" : []
+		},
+		
+		"health" : 100,
+		"speed" : 200,
+		"sight range" : 20,
+		"stamina" : 100,
+		"hunger" : 100,
+		"thirst" : 100,
+		"mana" : 100,
+		"sense range" : 10,
+		"determined" : 300,
+		"flags" : []
+	},
+
+	"test blind mob" : {
+		"name" : "test blind mob",
+		"plural" : "test blind mobs",
+		"description" : "A standard mob for debugging. It cannot detect the player over a long distance.",
+		
+		"tile" : {
+			"icon" : "B",
+			"color" : [0,185,255],
+			"flags" : []
+		},
+		
+		"health" : 100,
+		"speed" : 100,
+		"sight range" : 5,
+		"stamina" : 100,
+		"hunger" : 100,
+		"thirst" : 100,
+		"mana" : 100,
+		"sense range" : 5,
+		"determined" : 100,
+		"flags" : []
+	},
+
+	"test determined mob" : {
+		"name" : "test determined mob",
+		"plural" : "test determined mobs",
+		"description" : "A standard mob for debugging. It will chase the player over a very long distance.",
+		
+		"tile" : {
+			"icon" : "D",
+			"color" : [255,0,0],
+			"flags" : []
+		},
+		
+		"health" : 100,
+		"speed" : 100,
+		"sight range" : 100,
+		"stamina" : 100,
+		"hunger" : 100,
+		"thirst" : 100,
+		"mana" : 100,
+		"sense range" : 100,
+		"determined" : 10000,
+		"flags" : []
+	}
+}
