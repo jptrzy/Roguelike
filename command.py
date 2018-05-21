@@ -45,7 +45,7 @@ class commands(object):
 		if uinput == terminal.TK_ESCAPE:
 			game.proceed = False
 		elif uinput in self.move.keys():
-			movement_time = time.clock()
+			#p movement_time = time.clock()
 
 			newy = game.me.y + self.move[uinput][0]
 			newx = game.me.x + self.move[uinput][1]

@@ -51,7 +51,7 @@ class Game(object):
 #			self.anim.anim_loop(self)
 
 		while self.proceed:
-			total_time = time.clock()
+			#p total_time = time.clock()
 			while self.proceed and terminal.has_input():
 				uinput = terminal.read()
 				self.commandframe.command(uinput, self)
