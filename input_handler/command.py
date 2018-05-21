@@ -129,21 +129,7 @@ class commands_handler(object):
 
 		elif uinput == terminal.TK_S:
 			if not self.shift_on:
-				type_of_mob = terminal.read()
-				if type_of_mob == terminal.TK_1:
-					create_mob = "test mob"
-				elif type_of_mob == terminal.TK_2:
-					create_mob = "test speed mob"
-				elif type_of_mob == terminal.TK_3:
-					create_mob = "test light mob"
-				elif type_of_mob == terminal.TK_4:
-					create_mob = "test blind mob"
-				elif type_of_mob ==terminal.TK_5:
-					create_mob = "test determined mob"
-				else:
-					create_mob = "test mob"
-
-				game.mob_generator.create_mob(create_mob, game.me.y + 8, game.me.x)
+				game.mob_generator.wizard_create_mob(game.me.y+4, game.me.x)
 			else:
 				for chunk in game.all_mobs.mobs.values():
 					for mob in chunk:

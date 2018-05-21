@@ -1,6 +1,7 @@
 import json
 from tiles_data import tiles
 from mobs import mobs
+from window import windows
 
 
 
@@ -136,3 +137,9 @@ class mob_generator(object):
 		successful = mob_obj.spawn(y, x, self.game.world, self.game.FOV, self.game.all_mobs, self.game.timer.time)
 		
 		return successful
+
+	def wizard_create_mob(self, y, x):
+		create_mob_prompt = windows.scroll_selection_popup("Spawn which mob?", self.mobs_data.keys(), self.game.preferences.w_ylen, self.game.preferences.w_xlen, self.game.activepopups)
+		mob_id = create_mob_prompt.init()
+
+		self.create_mob(mob_id, y, x)
