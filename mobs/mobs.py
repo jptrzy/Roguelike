@@ -64,8 +64,7 @@ class dynamic_stat(stat):
 
 
 class living(object):
-	def __init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana,
-			     ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
+	def __init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana,ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
 		self.id_ = id_
 		self.name = name
 		self.plural = plural

@@ -130,7 +130,7 @@ class Game(object):
 				break
 
 		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
-		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, sight_range=25, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False)
+		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, sight_range=25, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)
@@ -159,6 +159,7 @@ class Game(object):
 		#p FOV_time, render_time, print_time = self.world.view(self)
 		self.world.view()
 		#p total_render_time = FOV_time+render_time+print_time
+		self.all_mobs.recalc_visible_mobs(self)
 		self.all_mobs.print_mob_data(self)
 		self.timer.vprint()
 		self.me.printstats()
