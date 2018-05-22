@@ -18,7 +18,7 @@ from window import messagepanel
 from animation import *
 from window import infopanel
 from window import windows
-from data import generators
+import generators
 
 import shelve
 

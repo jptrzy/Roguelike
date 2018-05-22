@@ -8,7 +8,7 @@ executables = [
     Executable(script='main.py')
 ]
 
-includefiles = ['FSEX300.ttf', 'saves']
+includefiles = ['FSEX300.ttf', 'saves', 'data']
 includes = []
 excludes = []
 packages = []
