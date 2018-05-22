@@ -283,12 +283,12 @@ class mob_group(object):
 
 		self.check_coords = [(0,0),(0,1),(1,0),(1,1),(0,-1),(-1,0),(-1,-1),(1,-1),(-1,1)]
 
-	def init_window(self, game_y_len, game_x_len):
-		self.window = windows.window(game_y_len - 27, 14, 1, game_x_len - 15)
+	def init_window(self, y_len, x_len, y, x):
+		self.window = windows.window(y_len, x_len, y, x)
 
-	def recalc_win(self, game_y_len, game_x_len):
-		self.window.resize(game_y_len - 27, 14)
-		self.window.move(1, game_x_len - 15)
+	def recalc_win(self, y_len, x_len, y, x):
+		self.window.resize(y_len, x_len)
+		self.window.move(y, x)
 
 	def recalc_visible_mobs(self, game):
 		self.visible_mobs = []

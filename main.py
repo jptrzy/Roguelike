@@ -11,7 +11,7 @@ if __name__ == '__main__':
 	os.chdir('.')
 	os.sys.path.append('.')
 	
-	Preferences = preferences()
+	Preferences = preferences(w_ylen=33, w_xlen=80, fullscreen=False)
 	Preferences.load()
 
 	Main_menu = main_menu()
@@ -19,12 +19,9 @@ if __name__ == '__main__':
 	# initialize screen
 	terminal.open()
 
-	terminal.set("window: title = 'Roguelike Pre-Alpha 0.01', fullscreen=false, resizeable=true; font: FSEX300.ttf, size=16x16")
+	terminal.set("window: title = 'Roguelike Pre-Alpha 0.01', fullscreen=false, resizeable=true; font: FSEX300.ttf, size=15x20")
 	terminal.set("window: size="+str(Preferences.w_xlen)+'x'+str(Preferences.w_ylen))
 	terminal.set("output.vsync=false")
-
-	terminal.set("entity font: FSEX300.ttf, size=16x16")
-	terminal.set("message font: FSEX300.ttf, size=16x16")
 
 	terminal.composition(terminal.TK_ON)
 

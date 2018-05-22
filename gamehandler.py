@@ -30,6 +30,7 @@ class Game(object):
 	def mainloop(self):
 		self.proceed = True
 		# start printing screen
+		self.all_mobs.print_mob_data(self)
 		self.me.printstats()
 		self.world.view()
 
@@ -68,16 +69,40 @@ class Game(object):
 		# assume game has already loaded/created
 
 		# initialize windows
-		self.world.recalc_win(self.preferences.w_ylen, self.preferences.w_xlen)
-		self.me.window_init(self.preferences.w_ylen, self.preferences.w_xlen)
-		self.all_mobs.recalc_visible_mobs(self)
-		self.all_mobs.init_window(self.preferences.w_ylen, self.preferences.w_xlen)
-		self.all_mobs.print_mob_data(self)
-		self.message_panel.curs_init(self.preferences.w_ylen, self.preferences.w_xlen)
-		self.info_panel = infopanel.info_panel(self)
+		left_display_panel_length = 22
+		right_display_panel_length = 22
+		message_panel_length = 10
+		"""
+		main windows: 
+			world display (layers 0 to 100):
 
+			message window (layer 0):
+
+			left info panel (layer 0):
+
+			right info panel:
+
+			main display panel: layer 150
+
+
+		overlayed info panel (layer 180):
+
+		borders: layer 200
+
+		popup windows: layer 201+
+
+		"""
+		self.all_mobs.recalc_visible_mobs(self)
+		self.info_panel = infopanel.info_panel(self)
 		self.bg_windows = windows.panel_windows()
+
+		self.world.recalc_win(self.preferences.w_ylen-message_panel_length-3, self.preferences.w_xlen-left_display_panel_length-1-right_display_panel_length-1, 1, left_display_panel_length+1)
+		self.me.window_init(6, left_display_panel_length-1, 1, 1)  # health, mana, stamina, hunger+thirst
+		self.all_mobs.init_window(self.preferences.w_ylen-27, right_display_panel_length-1, 1, self.preferences.w_xlen-right_display_panel_length)
+		self.message_panel.curs_init(message_panel_length, self.preferences.w_xlen-left_display_panel_length-1-right_display_panel_length-1, self.preferences.w_ylen-message_panel_length-1, left_display_panel_length+1)
 		self.bg_windows.recalc_win(self.preferences.w_ylen, self.preferences.w_xlen, 0, 0, 150)
+		self.info_panel.recalc_win(self.preferences.w_ylen-2, right_display_panel_length-1, 1, self.preferences.w_xlen - right_display_panel_length)
+		
 		self.bg_windows.add_win(self.me.window)
 		self.bg_windows.add_win(self.all_mobs.window)
 		self.bg_windows.add_win(self.world.layers.windows)
@@ -130,7 +155,7 @@ class Game(object):
 				break
 
 		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
-		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, sight_range=25, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20)
+		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, sight_range=30, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)

@@ -6,9 +6,10 @@ from window import windows
 import os
 
 class preferences(object):
-	def __init__(self, w_ylen=40, w_xlen=65): # ylenn 40 xlen 65
+	def __init__(self, w_ylen=40, w_xlen=65, fullscreen=False): # ylenn 40 xlen 65
 		self.w_ylen = w_ylen
 		self.w_xlen = w_xlen
+		self.fullscreen = fullscreen
 
 	def load(self):
 		pass # later, replace __init__ with load

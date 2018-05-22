@@ -18,8 +18,8 @@ class character(living):
 
 		self.inv = inv()
 
-	def window_init(self, game_y_len, game_x_len):
-		self.window = windows.window(6, 14, 1, 1)  # health, mana, stamina, hunger+thirst
+	def window_init(self, w_ylen, w_xlen, y, x):
+		self.window = windows.window(w_ylen, w_xlen, y, x)
 
 	def recalc_win(self, game_y_len, game_x_len):
 		self.window.move(1, 1)

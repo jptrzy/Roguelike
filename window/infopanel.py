@@ -8,7 +8,7 @@ from message import *
 class info_panel(object):
 	def __init__(self, game):
 		self.game = game
-		self.window = window(game.preferences.w_ylen-2, 14, 1, game.preferences.w_xlen - 15, layer=180)
+		self.window = window(game.preferences.w_ylen-2, 30-1, 1, game.preferences.w_xlen - 30, layer=180)
 
 		self.line = ''
 		for i in range(self.window.xlen):
@@ -16,9 +16,9 @@ class info_panel(object):
 
 		self.display_type = 'manual'
 
-	def recalc_win(self, game_y_len, game_x_len):
-		self.window.resize(game_y_len-2, 14)
-		self.window.move(1, game_x_len - 15)
+	def recalc_win(self, y_len, x_len, y, x):
+		self.window.resize(y_len, x_len)
+		self.window.move(y, x)
 		self.line = ''
 		for i in range(self.window.xlen):
 			self.line += u'═'

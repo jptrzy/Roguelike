@@ -12,12 +12,12 @@ class message_panel(object):
 		self.new = set() # set of new rows added
 		self.raw_messages = [] # list of [message1, message2, ... ]
 
-	def curs_init(self, game_y_len, game_x_len):
-		self.window = window(13, game_x_len - 32, game_y_len - 14, 16)
+	def curs_init(self, y_len, x_len, y, x):
+		self.window = window(y_len, x_len, y, x)
 
-	def recalc_win(self, game_y_len, game_x_len):
-		self.window.resize(13, game_x_len - 32)
-		self.window.move(game_y_len - 14, 16)
+	def recalc_win(self, y_len, x_len, y, x):
+		self.window.resize(y_len, x_len)
+		self.window.move(y, x)
 
 	def custom_add_phrase(self, input_):
 		#input will be in form[('phrase', color), ... ]
@@ -53,12 +53,12 @@ class message_panel(object):
 					self.new.remove(a*(self.window.ylen - 1)+n+top_line_n)
 					for i in range(self.window.xlen):
 						try:
-							self.window.put(window_line_n, i, '[font=message]'+row[i][0]+'[/font]', row[i][1]) # +1 for boundary
+							self.window.put(window_line_n, i, row[i][0], row[i][1]) # +1 for boundary
 						except IndexError:
 							pass
 					window_line_n += 1
 				# prompt continue
-				self.window.wprint(self.window.ylen-1, 0, '---more---')
+				self.window.wprint(self.window.ylen-1, 0, '(more...)')
 				terminal.refresh()
 				dir = terminal.read()
 
@@ -72,13 +72,13 @@ class message_panel(object):
 			if top_line_n + window_line_n in self.new:
 				for i in range(self.window.xlen):
 					try:
-						self.window.put(window_line_n, i, '[font=message]'+row[i][0]+'[/font]', row[i][1]) # +1 for boundary
+						self.window.put(window_line_n, i, row[i][0], row[i][1]) # +1 for boundary
 					except IndexError:
 						pass
 			else:
 				for i in range(self.window.xlen):
 					try:
-						self.window.put(window_line_n, i, '[font=message]'+row[i][0]+'[/font]', [91, 91, 91]) # +1 for boundary
+						self.window.put(window_line_n, i, row[i][0], [91, 91, 91]) # +1 for boundary
 					except IndexError:
 						pass
 			window_line_n += 1

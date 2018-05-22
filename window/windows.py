@@ -3,46 +3,6 @@ from bearlibterminal import terminal
 from message import *
 import math
 
-"""
-main windows: 
-	world display (layers 0 to 100):
-		terrain (1)
-		constructs (2)
-		mobs (3)
-
-		x : 16 to x_len - 16
-		y : 0 to y_len - 14
-
-	message window (layer 0):
-
-		x : 16 to x_len - 16
-		y : y_len - 15 to y_len
-
-	left info panel (layer 0):
-
-		character stats and name:
-			x : 0 to 15
-			y : 0 to 7
-
-	right info panel:
-		
-		mob info:
-			x : game_x_len - 16 to game_x_len
-			y : 0 to game_y_len - 25
-
-	main display panel: layer 150
-
-
-overlayed info panel (layer 180):
-	x : game_x_len - 16 to game_x_len
-	y : 0 to game_y_len
-
-borders: layer 200
-
-popup windows: layer 201+
-
-"""
-
 class window(object):
 	def __init__(self, ylen, xlen, y, x, layer=0, wtype='normal', multi_layer=False):
 		self.y = y
@@ -147,54 +107,39 @@ class window(object):
 
 class panel(object):
 	def __init__(self, ylen, xlen, y, x):
-		self.windows = [] # ordered from lowest layer to highest layer
+		self.windows = {} # dictionary: { "id" : window }
 		self.ylen = ylen
 		self.xlen = xlen
 		self.y = y
 		self.x = x
 
-	def add_win(self, wlayer):
+	def get_win(self, id_):
+		return self.windows[id_]
+
+	def add_win(self, wlayer, id_):
 		new_win = window(self.ylen, self.xlen, self.y, self.x, layer=wlayer)
+		self.windows[id_] = new_win
 
-		if len(self.windows) != 0:
-			index = 0
-			for i in range(len(self.windows)):
-				if self.windows[i].layer >= wlayer:
-					break
-				else:
-					index += 1
-			self.windows.insert(index, new_win)
-		else:
-			self.windows.append(new_win)
-
-		return new_win
-
-	def del_win(self, wlayer):
-		for window in self.windows:
-			if window.layer == wlayer:
-				window.clear()
-				self.windows.remove(window)
-
+	def del_win(self, window_id):
+		del self.windows[window_id]
 
 	def clear(self):
-		for swindow in self.windows:
+		for swindow in self.windows.values():
 			swindow.clear()
 
 	def move(self, y, x):
-		for swindow in self.windows:
+		for swindow in self.windows.values():
 			swindow.move(y, x)
+
 		self.y = y
 		self.x = x
 
 	def resize(self, y_len, x_len):
-		for swindow in self.windows:
+		for swindow in self.windows.values():
 			swindow.resize(y_len, x_len)
 
 		self.ylen = y_len
 		self.xlen = x_len
-
-	def print_border(self):
-		self.windows[-1].print_border()
 
 	def get_occupied(self):
 		# get set of all occupied coords

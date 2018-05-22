@@ -61,21 +61,21 @@ class layer_tracker(object):
 
 		self.visible_tiles_info = {} # dictionary of tile data as specified in worldmap.recalc_view
 
-		self.windows = windows.panel(self.worldmap.w_ylen, self.worldmap.w_xlen, 1, 16)
+		self.windows = windows.panel(self.worldmap.w_ylen, self.worldmap.w_xlen, 1, 10)
 
-		self.top_window = self.windows.add_win(self.worldlayers_count+1)
+		self.windows.add_win(self.worldlayers_count+1, "top")
 
 	def add_layer(self, name, max_objects=1):
 		new_worldlayer = worldlayer(self.worldmap, name, max_objects)
 		self.worldlayers[new_worldlayer.name] = new_worldlayer
 		self.worldlayers_count += 1
-		new_worldlayer.window = self.windows.add_win(self.worldlayers_count)
+		new_worldlayer.window = self.windows.add_win(self.worldlayers_count, new_worldlayer.name)
 
 		self.recalc_top_window()
 
 	def recalc_top_window(self):
-		self.windows.del_win(self.top_window.layer)
-		self.top_window = self.windows.add_win(self.worldlayers_count+1)
+		self.windows.del_win("top")
+		self.windows.add_win(self.worldlayers_count+1, "top")
 
 	def add_tile(self, y, x, tile):
 		tile.worldlayer = self.worldlayers[tile.worldlayer_name]
@@ -131,8 +131,8 @@ class worldmap(object):
 		self.radius = ylen/2
 		self.gametype = gametype
 
-		self.w_ylen = 26#56   #90
-		self.w_xlen = 46#96   #160
+		self.w_ylen = 0
+		self.w_xlen = 0
 
 		self.worldmap = []
 		self.tmap = []
@@ -183,10 +183,11 @@ class worldmap(object):
 ################12 ################
 ################ ##################
 ###################################
-	def recalc_win(self, game_w_ylen, game_w_xlen):
-		self.w_xlen = game_w_xlen - 32 # 32 from side panels
-		self.w_ylen = game_w_ylen - 16 # 15 for message window
+	def recalc_win(self, w_ylen, w_xlen, y, x):
+		self.w_xlen = w_xlen
+		self.w_ylen = w_ylen
 		self.layers.windows.resize(self.w_ylen, self.w_xlen)
+		self.layers.windows.move(y, x)
 
 	def initworld(self):
 		### init grid
@@ -274,14 +275,14 @@ class worldmap(object):
 			#{ (window coords) : [[tile1, tile_color1], ... ] }
 			for tile_data in self.layers.visible_tiles_info[tilecoord]:
 				current_tile = tile_data[0]
-				current_tile.worldlayer.window.put(tilecoord[0], tilecoord[1], current_tile.icon, tile_data[1])
-		
+				self.layers.windows.get_win(current_tile.worldlayer.name).put(tilecoord[0], tilecoord[1], current_tile.icon, tile_data[1])
+
 		#p print("print view: --- %s seconds ---" % (time.clock() - time_3))
 		#p print("--------------------------------------------------------")
 		#p print("--------------------------------------------------------")
 
 	def print_indicator(self, y, x, indicator=u'×'):
-		self.layers.top_window.put(y - self.window_top_y, x - self.window_top_x, indicator)
+		self.layers.windows.get_win("top").put(y - self.window_top_y, x - self.window_top_x, indicator)
 
 	def recalc_FOV(self):
 		#p time_1 = time.clock()
@@ -292,9 +293,6 @@ class worldmap(object):
 		locx = character.x
 
 		sight = character.sight_range.value
-
-		topy = locy - int(self.w_ylen / 2)
-		topx = locx - int(self.w_xlen / 2)
 
 		rendy = locy - sight
 		rendx = locx - sight
@@ -317,8 +315,8 @@ class worldmap(object):
 		sun_emit_str = self.game.timer.day_night_emit_str()
 		sun_color_str = self.game.timer.day_night_color_str()
 
-		self.window_top_y = y - self.w_ylen / 2
-		self.window_top_x = x - self.w_xlen / 2
+		self.window_top_y = y - int(float(self.w_ylen) / 2)
+		self.window_top_x = x - int(float(self.w_xlen) / 2)
 
 		self.layers.visible_tiles_info = {}
 			
