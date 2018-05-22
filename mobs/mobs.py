@@ -328,6 +328,8 @@ class mob_group(object):
 
 	def update(self, game):
 		while self.refresh_actives(game) > 0:
+			if not game.proceed:
+				return
 			self.active_mobs.sort(key = lambda x: x.next_update_time)
 			if self.active_mobs[0].check_update_time(game.next_update_time):
 				self.active_mobs[0].update(game)

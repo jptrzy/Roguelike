@@ -4,15 +4,33 @@
 from bearlibterminal import terminal
 from window import windows
 import os
+import json
 
 class preferences(object):
-	def __init__(self, w_ylen=40, w_xlen=65, fullscreen=False): # ylenn 40 xlen 65
-		self.w_ylen = w_ylen
-		self.w_xlen = w_xlen
-		self.fullscreen = fullscreen
+	def __init__(self, path):
+		with open(path) as file:
+			preferences_data = json.load(file)
 
-	def load(self):
-		pass # later, replace __init__ with load
+		self.fullscreen = preferences_data["fullscreen"]
+		self.resolution_height = preferences_data["resolution height"]
+		self.resolution_width = preferences_data["resolution width"]
+
+		# what size to use when not fullscreen
+		self.default_w_ylen = preferences_data["w_ylen"]
+		self.default_w_xlen = preferences_data["w_xlen"]
+
+	def recalc(self):
+		# call after terminal has opened
+		if self.fullscreen:
+			self.w_ylen = self.resolution_height / terminal.state(terminal.TK_CELL_HEIGHT)
+			self.w_xlen = self.resolution_width / terminal.state(terminal.TK_CELL_WIDTH)
+			terminal.set("window: fullscreen=true")
+		else:
+			self.w_ylen = self.default_w_ylen
+			self.w_xlen = self.default_w_xlen
+			terminal.set("window: fullscreen=false")
+		
+		terminal.set("window: size="+str(self.w_xlen)+'x'+str(self.w_ylen))
 
 class choice(windows.window):
 	def __init__(self, text, y, x, layer):

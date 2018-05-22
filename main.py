@@ -10,20 +10,17 @@ import os
 if __name__ == '__main__':
 	os.chdir('.')
 	os.sys.path.append('.')
-	
-	Preferences = preferences(w_ylen=33, w_xlen=80, fullscreen=False)
-	Preferences.load()
-
-	Main_menu = main_menu()
 
 	# initialize screen
 	terminal.open()
-
-	terminal.set("window: title = 'Roguelike Pre-Alpha 0.01', fullscreen=false, resizeable=true; font: FSEX300.ttf, size=15x20")
-	terminal.set("window: size="+str(Preferences.w_xlen)+'x'+str(Preferences.w_ylen))
+	terminal.set("window: title = 'Roguelike Pre-Alpha 0.01', resizeable=true; font: FSEX300.ttf, size=15x20")
 	terminal.set("output.vsync=false")
-
 	terminal.composition(terminal.TK_ON)
+	
+	Preferences = preferences('.\data\preferences.json')
+	Preferences.recalc()
+
+	Main_menu = main_menu()
 
 	# first refresh
 	terminal.refresh()
@@ -41,14 +38,20 @@ if __name__ == '__main__':
 		elif start_game_mode == 'Quit':
 			break
 
-		game.start_game(Preferences)
-		# ask to save game or not
-		ask_save_game_window = windows.yes_or_no_popup('Save game? (y/n)', Preferences.w_ylen, Preferences.w_xlen)
-		ask_save_game = ask_save_game_window.init()
-		if ask_save_game:
-			save_game = shelve.open(".\saves\\"+start_game_file, 'n')
-			save_game['game'] = game
-			save_game.close()
+		survived = game.start_game(Preferences)
+
+		if survived:
+			# ask to save game or not
+			ask_save_game_window = windows.yes_or_no_popup('Save game? (y/n)', Preferences.w_ylen, Preferences.w_xlen)
+			ask_save_game = ask_save_game_window.init()
+			if ask_save_game:
+				save_game = shelve.open(".\saves\\"+start_game_file, 'n')
+				save_game['game'] = game
+				save_game.close()
+		else:
+			# delete game file
+			if os.path.isfile(".\saves\\"+start_game_file):
+				os.remove(".\saves\\"+start_game_file)
 
 		terminal.clear()
 

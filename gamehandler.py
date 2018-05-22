@@ -59,12 +59,15 @@ class Game(object):
 				self.commandframe.command(uinput, self)
 			#p print("total time: --- %s seconds ---" % (time.clock() - total_time))
 
-		self.close()
+		return not self.die
 
-	def close(self):
-		pass
+	def game_over(self):
+		self.die = True
+		self.proceed = False
+		windows.pure_text_popup("Rest in peace.", self.preferences.w_ylen, self.preferences.w_xlen, activepopups=self.activepopups)
 
 	def start_game(self, preferences):
+		self.die = False
 		self.preferences = preferences
 		# assume game has already loaded/created
 
@@ -116,7 +119,7 @@ class Game(object):
 
 		self.activepopups = 0
 
-		self.mainloop()
+		return self.mainloop()
 
 	def gen_new_game(self, preferences):
 		terminal.clear()
@@ -171,25 +174,27 @@ class Game(object):
 		self.message_panel = messagepanel.message_panel()
 
 	def update_view(self):
-		self.world.view()
-		self.all_mobs.print_mob_data(self)
+		if self.proceed:
+			self.world.view()
+			self.all_mobs.print_mob_data(self)
 
 	def recalc_input(self, time_amount):
 		self.timer.recalc(time_amount, self)
 		self.all_mobs.update(self)
 
 	def update_screen(self):
-		#p self.world.start_time = time.clock()
-		#p total_view_time_start = time.clock()
-		#p FOV_time, render_time, print_time = self.world.view(self)
-		self.world.view()
-		#p total_render_time = FOV_time+render_time+print_time
-		self.all_mobs.recalc_visible_mobs(self)
-		self.all_mobs.print_mob_data(self)
-		self.timer.vprint()
-		self.me.printstats()
+		if self.proceed:
+			#p self.world.start_time = time.clock()
+			#p total_view_time_start = time.clock()
+			#p FOV_time, render_time, print_time = self.world.view(self)
+			self.world.view()
+			#p total_render_time = FOV_time+render_time+print_time
+			self.all_mobs.recalc_visible_mobs(self)
+			self.all_mobs.print_mob_data(self)
+			self.timer.vprint()
+			self.me.printstats()
 
-		terminal.refresh()
+			terminal.refresh()
 
 	def update(self, time_increase=0):
 		# only use this function when advancing time for player.

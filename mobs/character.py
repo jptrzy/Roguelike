@@ -42,4 +42,4 @@ class character(living):
 
 	def die(self, game):
 		print "RIP"
-		game.proceed = False
+		game.game_over()
