@@ -97,25 +97,6 @@ class commands_handler(object):
 			game.message_panel.add_phrase(dir, [255,0,0])
 			game.message_panel.print_messages()
 
-		elif uinput == terminal.TK_L:
-			while not terminal.has_input():
-				type_of_torch = terminal.read()
-				break
-			if type_of_torch == terminal.TK_R:
-				torch_id = "torch"
-			elif type_of_torch == terminal.TK_B:
-				torch_id = "blue torch"
-			while not terminal.has_input():
-				dir = terminal.read()
-				break
-
-			torchy = game.me.y + self.move[dir][0]
-			torchx = game.me.x + self.move[dir][1]
-
-			game.tile_generator.create_tile(torch_id, torchy, torchx)
-
-			game.update_screen()
-
 		elif uinput == terminal.TK_X:
 			check_y = game.me.y
 			check_x = game.me.x
