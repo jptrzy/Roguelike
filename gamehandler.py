@@ -74,7 +74,7 @@ class Game(object):
 		self.all_mobs.init_window(self.preferences.w_ylen, self.preferences.w_xlen)
 		self.all_mobs.print_mob_data(self)
 		self.message_panel.curs_init(self.preferences.w_ylen, self.preferences.w_xlen)
-		self.info_panel = infopanel.info_panel(self.preferences.w_ylen, self.preferences.w_xlen)
+		self.info_panel = infopanel.info_panel(self)
 
 		self.bg_windows = windows.panel_windows()
 		self.bg_windows.recalc_win(self.preferences.w_ylen, self.preferences.w_xlen, 0, 0, 150)
@@ -129,10 +129,8 @@ class Game(object):
 			if player_name:
 				break
 
-		player_tile = tiles.tile(name=player_name, plural=player_name, icon='@', description='This is you.', color=[200,200,200], world_layer='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
-		self.me = character.character(name='Player', plural='Players', description='This is you.', 
-			      health=100, speed=100, sight_range=25, stamina=100, hunger=100, thirst=100, mana=100,
-			      ethereal=False, tile=player_tile, aura=None, emit=False)
+		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
+		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, sight_range=25, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)

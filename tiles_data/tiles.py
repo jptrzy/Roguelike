@@ -5,11 +5,13 @@ import copy
 import json
 
 class tile(object):
-	def __init__(self, name, plural, icon, description, color, world_layer, blocks_sight=False, blocks_path=False, ethereal=False):
+	def __init__(self, id_, name, plural, icon, description, description_long, color, world_layer, blocks_sight=False, blocks_path=False, ethereal=False):
+		self.id_ = id_
 		self.name = name
 		self.plural = plural
 		self.icon = icon
 		self.description = description
+		self.description_long = description_long
 		self.color = color
 		self.worldlayer_name = world_layer
 
@@ -18,7 +20,7 @@ class tile(object):
 		self.ethereal = ethereal
 
 class aura(object):
-	def __init__(self,  glow_color, glow_range, glow_str, glow_color_str):
+	def __init__(self, glow_color, glow_range, glow_str, glow_color_str):
 		self.glow_color = glow_color
 		self.glow_range = glow_range
 		self.glow_str = glow_str

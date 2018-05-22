@@ -58,7 +58,7 @@ class commands_handler(object):
 
 				game.update(move_action._calc_prep_time(game.me.speed.value))
 
-				if game.world.check_passable(newy, newx):
+				if game.world.check_passable(newy, newx) or uinput == terminal.TK_R:
 					game.me.remove()
 					game.me.add(newy, newx)
 					if game.me.emit:
@@ -160,7 +160,7 @@ class commands_handler(object):
 			check_x = game.me.x
 
 			game.info_panel.open(game.bg_windows)
-			game.info_panel.prompt(game, check_y, check_x)
+			game.info_panel.prompt(check_y, check_x)
 			game.info_panel.exit(game.bg_windows)
 			game.world.view()
 			terminal.refresh()

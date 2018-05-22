@@ -64,11 +64,13 @@ class dynamic_stat(stat):
 
 
 class living(object):
-	def __init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana,
+	def __init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana,
 			     ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
+		self.id_ = id_
 		self.name = name
 		self.plural = plural
 		self.description = description
+		self.description_long = description_long
 		self.speed = stat(speed)
 		self.sight_range = stat(sight_range)
 		
@@ -149,10 +151,10 @@ class living(object):
 		return -(float(self.detect_glow_str.value)/self.detect_glow_range.value)*distance_from_mob + self.detect_glow_str.value
 
 class mob(living):
-	def __init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana, sense_range, 
+	def __init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana, sense_range, 
 		         determined, pathfinding, hostile, ethereal, tile, aura, emit, 
 		         sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
-		living.__init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana,
+		living.__init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana,
 			            ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range)
 
 		self.sense_range = stat(sense_range)

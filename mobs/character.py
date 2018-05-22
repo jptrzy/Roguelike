@@ -13,11 +13,8 @@ class inv(object):
 		self.items = items
 
 class character(living):
-	def __init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana,
-			     ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20):
-		living.__init__(self, name, plural, description, health, speed, sight_range, stamina, hunger, thirst, mana,
-			     ethereal, tile, aura, emit, 
-			     sight_border_requirement, detect_glow_str, detect_glow_range)
+	def __init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina,hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100,detect_glow_range=20):
+		living.__init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range)
 
 		self.inv = inv()
 

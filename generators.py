@@ -30,19 +30,24 @@ class tile_generator(object):
 		try:
 			tile_data = self.tiles_data[tile_id]
 		except KeyError:
-			tile_data = self.tiles_data["error tile"]
+			tile_id = "error tile"
+			tile_data = self.tiles_data[tile_id]
 
 		tile_name = tile_data["name"]
 		tile_plural = tile_data["plural"]
 		tile_icon = tile_data["icon"]
 		tile_description = tile_data["description"]
+		try:
+			tile_description_long = tile_data["description long"]
+		except KeyError:
+			tile_description_long = None
 		tile_color = tile_data["color"]
 		tile_world_layer = tile_data["world layer"]
 
 		# aura
 		try:
 			aura_data = tile_data["aura"]
-			tile_aura = self.game.aura_generator.create_aura(aura_data)
+			tile_aura = self.game.aura_generator.create_aura_from_data(aura_data)
 		except KeyError:
 			tile_aura = None
 
@@ -52,8 +57,7 @@ class tile_generator(object):
 		tile_blocks_path = "BLOCKS_PATH" in tile_flags
 		tile_ethereal = "ETHEREAL" in tile_flags
 
-		tile_obj = tiles.tile(name=tile_name, plural=tile_plural, icon=tile_icon, description=tile_description, color=tile_color, 
-		                      world_layer=tile_world_layer, blocks_sight=tile_blocks_sight, blocks_path=tile_blocks_path, ethereal=tile_ethereal)
+		tile_obj = tiles.tile(id_=tile_id, name=tile_name, plural=tile_plural, icon=tile_icon, description=tile_description, description_long=tile_description_long, color=tile_color, world_layer=tile_world_layer, blocks_sight=tile_blocks_sight, blocks_path=tile_blocks_path, ethereal=tile_ethereal)
 
 		return (tile_obj, tile_aura)
 
@@ -88,6 +92,10 @@ class mob_generator(object):
 		mob_name = mob_data["name"]
 		mob_plural = mob_data["plural"]
 		mob_description = mob_data["description"]
+		try:
+			mob_description_long = mob_data["description long"]
+		except KeyError:
+			mob_description_long = None
 		mob_health = mob_data["health"]
 		mob_speed = mob_data["speed"]
 		mob_sight_range = mob_data["sight range"]
@@ -121,13 +129,9 @@ class mob_generator(object):
 			mob_aura = None
 			mob_emit = False
 
-		mob_tile = tiles.tile(name=mob_name, plural=mob_plural, icon=tile_icon, description=mob_description, color=tile_color, 
-		                      world_layer="mobs", blocks_sight=tile_blocks_sight, blocks_path=(not mob_ethereal), ethereal=mob_ethereal)
+		mob_tile = tiles.tile(id_=mob_id, name=mob_name, plural=mob_plural, icon=tile_icon, description=mob_description, description_long=mob_description_long, color=tile_color, world_layer="mobs", blocks_sight=tile_blocks_sight, blocks_path=(not mob_ethereal), ethereal=mob_ethereal)
 		
-		mob_obj = mobs.mob(name=mob_name, plural=mob_plural, description=mob_description, health=mob_health, speed=mob_speed, sight_range=mob_sight_range, 
-	                       stamina=mob_stamina, hunger=mob_hunger, thirst=mob_thirst, mana=mob_mana, sense_range=mob_sense_range, 
-		                   determined=mob_determined, pathfinding=mob_pathfinding, hostile=mob_hostile, ethereal=mob_ethereal, tile=mob_tile, aura=mob_aura, emit=mob_emit,
-		                   sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20)
+		mob_obj = mobs.mob(id_=mob_id, name=mob_name, plural=mob_plural, description=mob_description, description_long=mob_description_long, health=mob_health, speed=mob_speed, sight_range=mob_sight_range, stamina=mob_stamina, hunger=mob_hunger, thirst=mob_thirst, mana=mob_mana, sense_range=mob_sense_range, determined=mob_determined, pathfinding=mob_pathfinding, hostile=mob_hostile, ethereal=mob_ethereal, tile=mob_tile, aura=mob_aura, emit=mob_emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20)
 
 		return (mob_obj, mob_aura)
 

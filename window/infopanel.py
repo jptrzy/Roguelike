@@ -6,8 +6,9 @@ from windows import *
 from message import *
 
 class info_panel(object):
-	def __init__(self, game_y_len, game_x_len):
-		self.window = window(game_y_len-2, 14, 1, game_x_len - 15, layer=180)
+	def __init__(self, game):
+		self.game = game
+		self.window = window(game.preferences.w_ylen-2, 14, 1, game.preferences.w_xlen - 15, layer=180)
 
 		self.line = ''
 		for i in range(self.window.xlen):
@@ -22,28 +23,24 @@ class info_panel(object):
 		for i in range(self.window.xlen):
 			self.line += u'═'
 
-	def recalc_info(self, y, x, game):
-		distance = "%.2f" % math.hypot(game.me.y - y, game.me.x - x)
+	def recalc_info(self):
+		distance = "%.2f" % math.hypot(self.game.me.y - self.check_y, self.game.me.x - self.check_x)
 		s_add_message(convert_phrase_to_list('Distance: ' + str(distance)), self.window.xlen, self.add_new_title_row)
 		if self.display_type == 'manual':
 			visible = False
-			if (y, x) in game.world.visible_coords:
-				distance_from_player = game.world.distance_map[(y, x)]
-				if game.world.check_enough_light((y, x), distance_from_player, game.me):
+			if (self.check_y, self.check_x) in self.game.world.visible_coords:
+				self.reset_print_info()
+				distance_from_player = self.game.world.distance_map[(self.check_y, self.check_x)]
+				if self.game.world.check_enough_light((self.check_y, self.check_x), distance_from_player, self.game.me):
 					# print info
-					self.prepare_tile_info(y, x, game.world)
-
-					# check for entities
-					for visible_mob in game.all_mobs.visible_mobs:
-						if y == visible_mob.y and x == visible_mob.x:
-							s_add_message(custom_convert_phrase_to_list([('entities:', [255,255,255]), (visible_mob.name+'^',visible_mob.tile.color)]), self.window.xlen-1, self.add_new_row)
-
+					self.prepare_tile_info()
 					visible = True
 
 			if not visible:
 				s_add_message(convert_phrase_to_list('You cannot see this place.', [150,150,150]), self.window.xlen-1, self.add_new_row)
 		else:
-			if len(game.all_mobs.visible_mobs) > 0:
+			if len(self.game.all_mobs.visible_mobs) > 0:
+				self.reset_print_info()
 				self.prepare_mob_info(self.check_mob)
 			else:
 				s_add_message(convert_phrase_to_list('You do not see any entities.',[150,150,150]), self.window.xlen-1, self.add_new_row)
@@ -59,29 +56,28 @@ class info_panel(object):
 			else:
 				self.scroll_input = False
 
-
-	def move_camera(self, game):
+	def move_camera(self):
 		self.prep_window()
 
 		if self.display_type == 'auto':
-			if len(game.all_mobs.visible_mobs) > 0:
-				current_mob = game.all_mobs.visible_mobs[self.view_index]
+			if len(self.game.all_mobs.visible_mobs) > 0:
+				current_mob = self.game.all_mobs.visible_mobs[self.view_index]
 				self.check_y = current_mob.y
 				self.check_x = current_mob.x
 				self.check_mob = current_mob
 			else:
 				pass
 
-		self.recalc_info(self.check_y, self.check_x, game)
+		self.recalc_info()
 
-	def prompt(self, game, check_y, check_x):
+	def prompt(self, check_y, check_x):
 		self.view_index = 0
 
 		self.check_y = check_y
 		self.check_x = check_x
 
-		self.move_camera(game)
-		self._print(game)
+		self.move_camera()
+		self._print()
 
 		proceed = True
 
@@ -93,29 +89,29 @@ class info_panel(object):
 				else:
 					self.dir_shift = False
 
-				if not self.advance_input(game):
+				if not self.advance_input():
 					proceed = False
 
-	def advance_input(self, game):
-		if self.dir in game.commandframe.move:
+	def advance_input(self):
+		if self.dir in self.game.commandframe.move:
 			if self.dir in [terminal.TK_UP, terminal.TK_DOWN] and self.scroll_input:
 				# advance scroll
 				self.use_scroll_input()
 				terminal.refresh()
 			else:
 				if self.display_type == 'manual':
-					self.check_y += game.commandframe.move[self.dir][0]
-					self.check_x += game.commandframe.move[self.dir][1]
-					self.move_camera(game)
-					self._print(game)
+					self.check_y += self.game.commandframe.move[self.dir][0]
+					self.check_x += self.game.commandframe.move[self.dir][1]
+					self.move_camera()
+					self._print()
 
 		elif self.dir == terminal.TK_TAB:
 			if self.display_type == 'manual':
 				self.display_type = 'auto'
 			else:
 				self.display_type = 'manual'
-			self.move_camera(game)
-			self._print(game)
+			self.move_camera()
+			self._print()
 
 		elif self.dir in [terminal.TK_COMMA, terminal.TK_PERIOD] and self.dir_shift:
 			if self.display_type == 'auto':
@@ -124,9 +120,12 @@ class info_panel(object):
 				else:
 					self.view_index += 1
 
-				self.view_index = self.view_index % len(game.all_mobs.visible_mobs)
-				self.move_camera(game)
-				self._print(game)
+				self.view_index = self.view_index % len(self.game.all_mobs.visible_mobs)
+				self.move_camera()
+				self._print()
+
+		elif self.dir == terminal.TK_X:
+			self.print_expanded_tile_info()
 
 
 		elif self.dir == terminal.TK_ESCAPE:
@@ -134,21 +133,28 @@ class info_panel(object):
 
 		return True
 
-	def prepare_tile_info(self, y, x, worldmap):
-		tiles = worldmap.layers.get_tiles(y, x)
-		print_info = {} # dictionary: { layer name : [tile1, ... ], ... }
+	def reset_print_info(self):
+		tiles = self.game.world.layers.get_tiles(self.check_y, self.check_x)
+		self.print_info = {} # dictionary: { layer name : { tileid : [tileobj, count] , ... }, ... }
 
 		for tile in tiles:
-			if tile.worldlayer.name != 'mobs':
-				if tile.worldlayer.name not in print_info:
-					print_info[tile.worldlayer.name] = [tile]
+			if tile.worldlayer.name not in self.print_info:
+				self.print_info[tile.worldlayer.name] = {tile.id_ : [tile, 1]}
+			else:
+				if tile.id_ in self.print_info[tile.worldlayer.name]:
+					self.print_info[tile.worldlayer.name][tile.id_][1] += 1
 				else:
-					print_info[tile.worldlayer.name].append(tile)
+					self.print_info[tile.worldlayer.name][tile.id_] = [tile, 1]
 
-		for print_layer in print_info:
+	def prepare_tile_info(self):
+		for print_layer in self.print_info:
 			print_message = [(print_layer+":", (255,255,255))]
-			for tile in print_info[print_layer]:
-				print_message.append((tile.description, tile.color))
+			for tile_id in self.print_info[print_layer]:
+				tile = self.print_info[print_layer][tile_id][0]
+				tile_count = self.print_info[print_layer][tile_id][1]
+				print_message.append((tile.name, (255,255,255)))
+				if tile_count > 1:
+					print_message.append(("("+str(tile_count)+")", (255,255,255)))
 
 			s_add_message(custom_convert_phrase_to_list(print_message), self.window.xlen-1, self.add_new_row)
 
@@ -167,9 +173,29 @@ class info_panel(object):
 
 		self.output_length = self.title_length + self.body_length
 
-	def _print(self, game):
-		game.world.view_move(self.check_y, self.check_x)
-		game.world.print_indicator(self.check_y, self.check_x)
+	def print_expanded_tile_info(self):
+		print_message = []
+		for print_layer in self.print_info:
+			print_message.append((print_layer+": \\n", (255,255,255)))
+			for tile_id in self.print_info[print_layer]:
+				tile = self.print_info[print_layer][tile_id][0]
+				tile_count = self.print_info[print_layer][tile_id][1]
+				print_message.append((tile.name, (175,175,175)))
+				if tile_count > 1:
+					print_message.append(("("+str(tile_count)+")", (175,175,175)))
+				print_message.append(("\\n", (255,255,255)))
+				print_message.append((tile.description,  (100,100,100)))
+				if tile.description_long is not None:
+					print_message.append((tile.description_long, (100,100,100)))
+
+				print_message.append(("\\n", (255,255,255)))
+
+		pure_text_popup(print_message, self.game.preferences.w_ylen, self.game.preferences.w_xlen, title="Enter/Esc to close.", activepopups=self.game.activepopups)
+
+
+	def _print(self):
+		self.game.world.view_move(self.check_y, self.check_x)
+		self.game.world.print_indicator(self.check_y, self.check_x)
 
 		if not self.scroll_input:
 			self.print_title()
