@@ -35,6 +35,7 @@ class commands_handler(object):
 		}
 
 		self.update_time = 0
+		self.wizard_commands = wizard.wizard_commands()
 
 	def command(self, uinput, game):
 		if terminal.check(terminal.TK_SHIFT):
@@ -89,52 +90,12 @@ class commands_handler(object):
 			game.message_panel.add_phrase('Time advanced by ' + str(time_advance))
 			game.message_panel.print_messages()
 
-		elif uinput == terminal.TK_C:
-			type_of_construct = terminal.read()
-
-			construct_lib = {
-			terminal.TK_W : "black block",
-			terminal.TK_G : "gray glass",
-			terminal.TK_M : "example layered tile"
-			}
-
-			try:
-				construct = construct_lib[type_of_construct]
-				dir = terminal.read()
-			except KeyError:
-				dir = type_of_construct
-				construct = "black block"
-			
-			if game.tile_generator.create_tile(construct, game.me.y + self.move[dir][0], game.me.x + self.move[dir][1]):
-				game.message_panel.add_phrase('Placed ' + game.tile_generator.tiles_data[construct]["name"]+'.', [255,255,255])
-			else:
-				game.message_panel.add_phrase('Error placing construct.', [255,0,0])
-			game.message_panel.print_messages()
-			game.update_screen()
-
-		elif uinput == terminal.TK_V:
-			if terminal.check(terminal.TK_SHIFT):
-				topy = game.me.y - 10
-				topx = game.me.x - 10
-				for n in range(20):
-					for i in range(20):
-						game.world.conmap.add_tile(topy + n, topx + i, tiles.floor_wood)
-
 		elif uinput == terminal.TK_M:
 			while not terminal.has_input():
 				dir = terminal.read()
 				break
 			game.message_panel.add_phrase(dir, [255,0,0])
 			game.message_panel.print_messages()
-
-		elif uinput == terminal.TK_S:
-			if not self.shift_on:
-				game.mob_generator.wizard_create_mob(game.me.y+4, game.me.x)
-			else:
-				for chunk in game.all_mobs.mobs.values():
-					for mob in chunk:
-						mob.can_move = not mob.can_move
-			game.update_screen()
 
 		elif uinput == terminal.TK_L:
 			while not terminal.has_input():
@@ -171,9 +132,9 @@ class commands_handler(object):
 			game.me.printstats()
 
 		elif uinput == terminal.TK_ENTER:
-			message_test_popup = windows.text_input_popup('Enter test message to be displayed on the message panel:', game.preferences.w_ylen, game.preferences.w_xlen, title='test title', activepopups=game.activepopups, only_ascii = False)
+			message_test_popup = windows.text_input_popup('Enter test message to be displayed on the message panel:', game=game, title='test title', only_ascii=False)
 			message_test = message_test_popup.init()
-			if message_test:
+			if message_test is not None:
 				if message_test == 'Lorem Ipsum':
 					game.message_panel.add_phrase("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec lacus urna, rhoncus eget eros id, aliquet efficitur quam. Cras aliquam malesuada ex ut dapibus. Aliquam non nisl diam. Ut eget enim gravida, convallis nunc vel, consequat massa. Praesent ultricies lorem fringilla mauris lobortis, quis tincidunt velit vulputate. Aenean luctus dolor quis nisl vestibulum, tristique sagittis nisi bibendum. Cras molestie pulvinar tortor vitae elementum. Ut eu erat at neque dapibus commodo. Cras a ligula hendrerit est tincidunt accumsan. Ut sed interdum turpis, suscipit mollis eros. Suspendisse libero nunc, sodales eu diam nec, feugiat pharetra felis. Nullam vitae gravida justo. Proin volutpat vestibulum pulvinar. Aliquam gravida suscipit odio in placerat. \\v Cras est orci, dapibus vel semper nec, luctus vel nisl. Maecenas scelerisque imperdiet vestibulum. Cras sed ligula sit amet nisi dictum euismod sit amet nec lacus. Curabitur dapibus tellus nec orci luctus, nec hendrerit diam ornare. Curabitur sed ipsum a ligula vulputate iaculis. Morbi dignissim lectus vitae mattis ultricies. In sem magna, vestibulum rutrum elementum sed, maximus eu turpis. Morbi laoreet lorem diam, et porta nunc vestibulum a. Pellentesque varius hendrerit lectus, id dignissim arcu porta sit amet. Curabitur in facilisis turpis, vitae consectetur ex. Aliquam erat ipsum, porttitor a ullamcorper at, mattis ac eros. \\v Curabitur maximus efficitur interdum. Vivamus varius fermentum nibh, hendrerit laoreet elit sodales auctor. Suspendisse pellentesque turpis vel finibus varius. Phasellus vel lectus vitae odio auctor vehicula at vitae lacus. Nunc sagittis pharetra nulla, sed pharetra sem volutpat a. Aliquam finibus nulla quis metus ultrices vulputate. Pellentesque gravida fermentum quam, a fringilla sem tempor et. Suspendisse porttitor sapien ac lacinia dignissim. Mauris ante sapien, malesuada vitae eros sed, egestas aliquam ipsum. Nunc venenatis, risus sit amet gravida malesuada, erat libero egestas nisl, eu gravida velit diam sit amet nisi. In sit amet mollis ante, a dictum mi. Fusce gravida nulla id justo porta, at euismod nulla porta. In non quam ex.")
 				else:
@@ -237,7 +198,7 @@ class commands_handler(object):
 
 		# wizard mode
 		elif uinput == terminal.TK_BACKSLASH: # text_input_popup
-			wizard_popup = windows.text_input_popup('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut consequat dui vel bibendum volutpat. Curabitur at turpis felis. Curabitur quis mauris eu orci rhoncus auctor vel non turpis. Cras egestas tellus sit amet est dignissim, et fringilla risus condimentum. \\b Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus. Sed ante lorem, hendrerit quis velit nec, sollicitudin mattis risus.', game.preferences.w_ylen, game.preferences.w_xlen, title='Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title. Test title.', activepopups=game.activepopups)
+			wizard_popup = windows.text_input_popup('Enter your command:', game=game, only_ascii=False)
 			wizard_command = wizard_popup.init()
 			if wizard_command:
-				wizard.process_request(wizard_command, game)
+				self.wizard_commands.process_request(wizard_command, game)

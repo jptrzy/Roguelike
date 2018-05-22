@@ -12,14 +12,14 @@ def rand3(c1, c2, c3):
 
 def newtile(desc):
 	# unshade for simple map
-	return ("empty block", None)				   #---------space----------------------------------------
+	return ("empty_block", None)				   #---------space----------------------------------------
 	#return (tiles.space, None)                 #--------dot---------------------------------------
 
 def grid_tile(mapy, mapx):
 	if mapy % 2 == 0 and mapx % 2 == 0:
-		return ("empty block", None)
+		return ("empty_block", None)
 	else:
-		return ("empty dot", None)
+		return ("empty_dot", None)
 
 def chunk(world, game, mapy, mapx, rows=100, collumns=100):
 

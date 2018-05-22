@@ -1,5 +1,5 @@
 {
-	"error tile" : {
+	"error_tile" : {
 		"name" : "error tile",
 		"plural" : "error tiles",
 		"icon" : "?",
@@ -10,7 +10,7 @@
 		"flags" : []
 	},
 
-	"empty dot" : {
+	"empty_dot" : {
 		"name" : "empty space",
 		"plural" : "empty space",
 		"icon" : ".",
@@ -21,7 +21,7 @@
 		"flags" : []
 	},
 
-	"empty block" : {
+	"empty_block" : {
 		"name" : "empty space",
 		"plural" : "empty space",
 		"icon" : "█",
@@ -32,7 +32,7 @@
 		"flags" : []
 	},
 
-	"example layered tile" : {
+	"example_layered_tile" : {
 		"name" : "example layered tile",
 		"plural" : "example layered tiles",
 		"icon" : "%",
@@ -43,7 +43,7 @@
 		"flags" : []
 	},
 	
-	"dim torch" : {
+	"dim_torch" : {
 		"name" : "dim torch",
 		"plural" : "dim torches",
 		"icon" : "*",
@@ -75,7 +75,7 @@
 		}
 	},
 
-	"blue torch" : {
+	"blue_torch" : {
 		"name" : "blue torch",
 		"plural" : "blue torches",
 		"icon" : "*",
@@ -91,7 +91,7 @@
 		}
 	},
 
-	"black block" : {
+	"black_block" : {
 		"name" : "black block",
 		"plural" : "black blocks",
 		"icon" : "█",
@@ -102,7 +102,7 @@
 		"flags" : ["BLOCKS_PATH", "BLOCKS_SIGHT"]
 	},
 
-	"gray glass" : {
+	"gray_glass" : {
 		"name" : "gray glass",
 		"plural" : "gray glass",
 		"icon" : "█",

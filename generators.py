@@ -24,14 +24,14 @@ class tile_generator(object):
 
 	def re_path(self, path_to_tile_data):
 		with open(path_to_tile_data) as file:
-			self.tiles_data = json.load(file)
+			self.data = json.load(file)
 
 	def create_tile_from_id(self, tile_id):
 		try:
-			tile_data = self.tiles_data[tile_id]
+			tile_data = self.data[tile_id]
 		except KeyError:
 			tile_id = "error tile"
-			tile_data = self.tiles_data[tile_id]
+			tile_data = self.data[tile_id]
 
 		tile_name = tile_data["name"]
 		tile_plural = tile_data["plural"]
@@ -79,15 +79,15 @@ class mob_generator(object):
 	def __init__(self, game):
 		self.game = game
 
-	def re_path(self, path_to_tile_data):
-		with open(path_to_tile_data) as file:
-			self.mobs_data = json.load(file)
+	def re_path(self, path_to_mob_data):
+		with open(path_to_mob_data) as file:
+			self.data = json.load(file)
 
 	def create_mob_from_id(self, mob_id):
 		try:
-			mob_data = self.mobs_data[mob_id]
+			mob_data = self.data[mob_id]
 		except KeyError:
-			mob_data = self.mobs_data["test mob"]
+			mob_data = self.data["test mob"]
 
 		mob_name = mob_data["name"]
 		mob_plural = mob_data["plural"]
@@ -141,9 +141,3 @@ class mob_generator(object):
 		successful = mob_obj.spawn(y, x, self.game.world, self.game.FOV, self.game.all_mobs, self.game.timer.time)
 		
 		return successful
-
-	def wizard_create_mob(self, y, x):
-		create_mob_prompt = windows.scroll_selection_popup("Spawn which mob?", self.mobs_data.keys(), self.game.preferences.w_ylen, self.game.preferences.w_xlen, self.game.activepopups)
-		mob_id = create_mob_prompt.init()
-
-		self.create_mob(mob_id, y, x)

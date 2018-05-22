@@ -190,7 +190,7 @@ class info_panel(object):
 
 				print_message.append(("\\n", (255,255,255)))
 
-		pure_text_popup(print_message, self.game.preferences.w_ylen, self.game.preferences.w_xlen, title="Enter/Esc to close.", activepopups=self.game.activepopups)
+		pure_text_popup(print_message, game=self.game, title="Enter/Esc to close.", exit='escape')
 
 
 	def _print(self):

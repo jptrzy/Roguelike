@@ -1,5 +1,5 @@
 {
-	"test mob" : {
+	"test_mob" : {
 		"name" : "test mob",
 		"plural" : "test mobs",
 		"description" : "A standard test mob for debugging.",
@@ -23,7 +23,7 @@
 		"flags" : []
 	},
 
-	"test light mob" : {
+	"test_light_mob" : {
 		"name" : "test light mob",
 		"plural" : "test light mobs",
 		"description" : "A mob with an aura for debugging.",
@@ -54,7 +54,7 @@
 		"flags" : []
 	},
 
-	"test speed mob" : {
+	"test_speed_mob" : {
 		"name" : "test speed mob",
 		"plural" : "test speed mobs",
 		"description" : "A standard fast mob for debugging.",
@@ -78,7 +78,7 @@
 		"flags" : []
 	},
 
-	"test blind mob" : {
+	"test_blind_mob" : {
 		"name" : "test blind mob",
 		"plural" : "test blind mobs",
 		"description" : "A standard mob for debugging. It cannot detect the player over a long distance.",
@@ -102,7 +102,7 @@
 		"flags" : []
 	},
 
-	"test determined mob" : {
+	"test_determined_mob" : {
 		"name" : "test determined mob",
 		"plural" : "test determined mobs",
 		"description" : "A standard mob for debugging. It will chase the player over a very long distance.",

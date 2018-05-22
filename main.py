@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
 		if survived:
 			# ask to save game or not
-			ask_save_game_window = windows.yes_or_no_popup('Save game? (y/n)', Preferences.w_ylen, Preferences.w_xlen)
+			ask_save_game_window = windows.yes_or_no_popup('Save game? (y/n)', w_ylen=Preferences.w_ylen, w_xlen=Preferences.w_xlen)
 			ask_save_game = ask_save_game_window.init()
 			if ask_save_game:
 				save_game = shelve.open(".\saves\\"+start_game_file, 'n')

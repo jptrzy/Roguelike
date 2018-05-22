@@ -64,7 +64,7 @@ class Game(object):
 	def game_over(self):
 		self.die = True
 		self.proceed = False
-		windows.pure_text_popup("Rest in peace.", self.preferences.w_ylen, self.preferences.w_xlen, activepopups=self.activepopups)
+		windows.pure_text_popup("Rest in peace.", game=self)
 
 	def start_game(self, preferences):
 		self.die = False
@@ -125,6 +125,7 @@ class Game(object):
 		terminal.clear()
 		terminal.refresh()
 
+		self.activepopups = 0
 		self.preferences = preferences
 
 		# initialize object generators
@@ -152,9 +153,9 @@ class Game(object):
 		self.all_mobs = mobs.mob_group()
 
 		while True:
-			player_name_prompt = windows.text_input_popup("Enter your name:", preferences.w_ylen, preferences.w_xlen)
+			player_name_prompt = windows.text_input_popup("Enter your name:", game=self)
 			player_name = player_name_prompt.init()
-			if player_name:
+			if player_name is not None:
 				break
 
 		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
