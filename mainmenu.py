@@ -118,7 +118,7 @@ class main_menu(object):
 				else:
 					load_file_name_prompt = windows.scroll_selection_popup("Select save file:", saves, activepopups=self.active_popups,w_ylen=preferences.w_ylen, w_xlen=preferences.w_xlen)
 					load_file_name = load_file_name_prompt.init()
-					if load_file_name != None:
+					if load_file_name is not None:
 						start_game = True
 						start_game_inputs = ("Load", load_file_name)
 
