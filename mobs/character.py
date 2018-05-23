@@ -41,5 +41,4 @@ class character(living):
 			self.window.wprint(1+i, self.window.xlen // 2 -len(stat_amt)/2, stat_amt)
 
 	def die(self, game):
-		print "RIP"
 		game.game_over()
