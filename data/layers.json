@@ -1,0 +1,27 @@
+{
+	"order" : ["terrain", "test_multi_layer", "constructs", "mobs"],
+
+	"terrain" : {
+		"name" : "terrain",
+		"max objects" : 1,
+		"destructable" : false
+	},
+
+	"test_multi_layer" : {
+		"name" : "test multi layer",
+		"max objects" : 10,
+		"destructable" : true
+	},
+
+	"constructs" : {
+		"name" : "constructs",
+		"max objects" : 1,
+		"destructable" : true
+	},
+
+	"mobs" : {
+		"name" : "mobs",
+		"max objects" : 1,
+		"destructable" : false
+	}
+}
