@@ -152,9 +152,12 @@ class info_panel(object):
 			for tile_id in self.print_info[print_layer]:
 				tile = self.print_info[print_layer][tile_id][0]
 				tile_count = self.print_info[print_layer][tile_id][1]
-				print_message.append((tile.name, (255,255,255)))
+
 				if tile_count > 1:
+					print_message.append((tile.plural, (255,255,255)))
 					print_message.append(("("+str(tile_count)+")", (255,255,255)))
+				else:
+					print_message.append((tile.name, (255,255,255)))
 
 			s_add_message(custom_convert_phrase_to_list(print_message), self.window.xlen-1, self.add_new_row)
 
@@ -180,9 +183,11 @@ class info_panel(object):
 			for tile_id in self.print_info[print_layer]:
 				tile = self.print_info[print_layer][tile_id][0]
 				tile_count = self.print_info[print_layer][tile_id][1]
-				print_message.append((tile.name, (175,175,175)))
 				if tile_count > 1:
+					print_message.append((tile.plural, (175,175,175)))
 					print_message.append(("("+str(tile_count)+")", (175,175,175)))
+				else:
+					print_message.append((tile.name, (175,175,175)))
 				print_message.append(("\\n", (255,255,255)))
 				print_message.append((tile.description,  (100,100,100)))
 				if tile.description_long is not None:

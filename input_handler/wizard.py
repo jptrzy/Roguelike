@@ -56,7 +56,7 @@ class wizard_commands(object):
 			y, x = int(request[2]), int(request[3])
 		except:
 			while True:
-				prompt_coordinates = windows.text_input_popup("Enter relative y and x coordinates (separate by space):", game=game)
+				prompt_coordinates = windows.text_input_popup("Enter relative y and x coordinates (separate by space):", game=game, only_ascii=False)
 				coordinates = prompt_coordinates.init().split()
 
 				try:
