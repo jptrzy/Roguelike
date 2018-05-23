@@ -1,0 +1,22 @@
+{
+	"test_item" : {
+		"type" : "standard",
+		"name" : "test item",
+		"plural" : "test items",
+		"description" : "A standard item for debugging.",
+		"description long" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus varius pharetra finibus. Fusce ac vehicula massa, eu dapibus leo. Praesent viverra, urna vitae tempus mattis, nisi felis venenatis ligula, ac tempus eros mi at orci. Aenean luctus auctor erat, non ornare elit mattis quis. Quisque eget mi in ligula consequat mattis. Sed tempor faucibus risus vitae ultricies. Integer at mauris ex. Praesent in nisl orci. Vivamus in placerat risus, vitae elementum neque. Nunc porta sapien sit amet orci efficitur, feugiat luctus felis vestibulum. Morbi viverra ante sed lectus imperdiet, at ornare ipsum mattis. Ut metus sapien, convallis eu porta et, volutpat a tellus. Suspendisse justo tortor, interdum quis elit eget, dictum consectetur felis. Ut vestibulum ultricies tortor. Nunc vitae neque bibendum, dignissim nulla egestas, consequat orci.",
+		"weight" : 10,
+		"volume" : 10,
+		"flags" : []
+	},
+
+	"test_sword" : {
+		"type" : "melee weapon",
+		"name" : "sword",
+		"plural" : "swords",
+		"description" : "A test sword.",
+		"weight" : 20,
+		"volume" : 2,
+		"flags" : []
+	}
+}
