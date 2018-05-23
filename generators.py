@@ -2,6 +2,7 @@ import json
 from tiles_data import tiles
 from mobs import mobs
 from window import windows
+import items
 
 
 
@@ -26,13 +27,7 @@ class tile_generator(object):
 		with open(path_to_tile_data) as file:
 			self.data = json.load(file)
 
-	def create_tile_from_id(self, tile_id):
-		try:
-			tile_data = self.data[tile_id]
-		except KeyError:
-			tile_id = "error tile"
-			tile_data = self.data[tile_id]
-
+	def create_tile_from_data(self, tile_data, tile_id):
 		tile_name = tile_data["name"]
 		tile_plural = tile_data["plural"]
 		tile_icon = tile_data["icon"]
@@ -42,14 +37,13 @@ class tile_generator(object):
 		except KeyError:
 			tile_description_long = None
 		tile_color = tile_data["color"]
-		tile_world_layer = tile_data["world layer"]
+		tile_world_layer_id = tile_data["world layer id"]
 
-		# aura
+		# debris
 		try:
-			aura_data = tile_data["aura"]
-			tile_aura = self.game.aura_generator.create_aura_from_data(aura_data)
+			debris_data = tile_data["debris"]
 		except KeyError:
-			tile_aura = None
+			debris_data = None
 
 		# flags
 		tile_flags = tile_data["flags"]		
@@ -57,7 +51,25 @@ class tile_generator(object):
 		tile_blocks_path = "BLOCKS_PATH" in tile_flags
 		tile_ethereal = "ETHEREAL" in tile_flags
 
-		tile_obj = tiles.tile(id_=tile_id, name=tile_name, plural=tile_plural, icon=tile_icon, description=tile_description, description_long=tile_description_long, color=tile_color, world_layer=tile_world_layer, blocks_sight=tile_blocks_sight, blocks_path=tile_blocks_path, ethereal=tile_ethereal)
+		tile_obj = tiles.tile(id_=tile_id, name=tile_name, plural=tile_plural, icon=tile_icon, description=tile_description, description_long=tile_description_long, color=tile_color, world_layer_id=tile_world_layer_id, blocks_sight=tile_blocks_sight, blocks_path=tile_blocks_path, ethereal=tile_ethereal, aura=None, debris_data=debris_data)
+
+		return tile_obj
+
+	def create_tile_from_id(self, tile_id):
+		try:
+			tile_data = self.data[tile_id]
+		except KeyError:
+			tile_id = "error tile"
+			tile_data = self.data[tile_id]
+
+		tile_obj = self.create_tile_from_data(tile_data, tile_id)
+
+		# aura
+		try:
+			aura_data = tile_data["aura"]
+			tile_aura = self.game.aura_generator.create_aura_from_data(aura_data)
+		except KeyError:
+			tile_aura = None
 
 		return (tile_obj, tile_aura)
 
@@ -70,6 +82,7 @@ class tile_generator(object):
 		# if successful, add aura if tile has one
 		if successful:
 			if tile_aura is not None:
+				tile_obj.aura = tile_aura
 				tile_aura._init(self.game.world, self.game.world.aura_group, self.game.world.glow_coords, self.game.FOV)
 				tile_aura._spawn(y, x)
 
@@ -114,11 +127,16 @@ class mob_generator(object):
 
 		# tile
 		mob_tile_data = mob_data["tile"]
-		tile_icon = mob_tile_data["icon"]
-		tile_color = mob_tile_data["color"]
 
-		tile_flags = mob_tile_data["flags"]
-		tile_blocks_sight = "BLOCKS_SIGHT" in tile_flags
+		mob_tile_data["id_"] = mob_id
+		mob_tile_data["name"] = mob_name
+		mob_tile_data["plural"] = mob_plural
+		mob_tile_data["description"] = mob_description
+		mob_tile_description_long = mob_description_long
+		mob_tile_data["world layer id"] = "mobs"
+
+		if not mob_ethereal:
+			mob_tile_data["flags"].append("BLOCKS_PATH")
 
 		# aura
 		try:
@@ -129,7 +147,7 @@ class mob_generator(object):
 			mob_aura = None
 			mob_emit = False
 
-		mob_tile = tiles.tile(id_=mob_id, name=mob_name, plural=mob_plural, icon=tile_icon, description=mob_description, description_long=mob_description_long, color=tile_color, world_layer="mobs", blocks_sight=tile_blocks_sight, blocks_path=(not mob_ethereal), ethereal=mob_ethereal)
+		mob_tile = self.game.tile_generator.create_tile_from_data(mob_tile_data, mob_id)
 		
 		mob_obj = mobs.mob(id_=mob_id, name=mob_name, plural=mob_plural, description=mob_description, description_long=mob_description_long, health=mob_health, speed=mob_speed, sight_range=mob_sight_range, stamina=mob_stamina, hunger=mob_hunger, thirst=mob_thirst, mana=mob_mana, sense_range=mob_sense_range, determined=mob_determined, pathfinding=mob_pathfinding, hostile=mob_hostile, ethereal=mob_ethereal, tile=mob_tile, aura=mob_aura, emit=mob_emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20)
 
@@ -141,3 +159,17 @@ class mob_generator(object):
 		successful = mob_obj.spawn(y, x, self.game.world, self.game.FOV, self.game.all_mobs, self.game.timer.time)
 		
 		return successful
+
+class item_generator(object):
+	def __init__(self, game):
+		self.game = game
+
+	def re_path(self, path_to_mob_data):
+		with open(path_to_mob_data) as file:
+			self.data = json.load(file)
+
+	def create_item_from_id(self, id_):
+		try:
+			item_data = self.data[id_]
+		except KeyError:
+			item_data = self.data["test_item"]

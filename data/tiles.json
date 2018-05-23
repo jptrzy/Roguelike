@@ -6,7 +6,7 @@
 		"description" : "Placeholder tile.",
 		"description long" : "Put extra description here.",
 		"color" : [255,0,0],
-		"world layer" : "terrain",
+		"world layer id" : "terrain",
 		"flags" : []
 	},
 
@@ -17,7 +17,7 @@
 		"description" : "Empty space.",
 		"description long" : "A tile used for debugging.",
 		"color" : [240,255,255],
-		"world layer" : "terrain",
+		"world layer id" : "terrain",
 		"flags" : []
 	},
 
@@ -28,7 +28,7 @@
 		"description" : "Empty space.",
 		"description long" : "A tile used for debugging.",
 		"color" : [240,255,255],
-		"world layer" : "terrain",
+		"world layer id" : "terrain",
 		"flags" : []
 	},
 
@@ -39,7 +39,7 @@
 		"description" : "An example tile.",
 		"description long" : "It can be placed 10 times within a single coordinate. A tile used for debugging.",
 		"color" : [240,0,20],
-		"world layer" : "example objects",
+		"world layer id" : "test_multi_layer",
 		"flags" : []
 	},
 	
@@ -49,7 +49,7 @@
 		"icon" : "*",
 		"description" : "A dim wooden torch.", 
 		"color" : [249,173,34],
-		"world layer" : "constructs",
+		"world layer id" : "constructs",
 		"flags" : [],
 		"aura" : {
 			"glow_color" : [249,173,34],
@@ -65,7 +65,7 @@
 		"icon" : "*",
 		"description" : "A wooden torch.",
 		"color" : [249,125,34],
-		"world layer" : "constructs",
+		"world layer id" : "constructs",
 		"flags" : [],
 		"aura" : {
 			"glow_color" : [249,173,34],
@@ -81,7 +81,7 @@
 		"icon" : "*",
 		"description" : "A blue wooden torch.",
 		"color" : [249,125,34],
-		"world layer" : "constructs",
+		"world layer id" : "constructs",
 		"flags" : [],
 		"aura" : {
 			"glow_color" : [69,152,224],
@@ -98,8 +98,30 @@
 		"description" : "A black block.",
 		"description long" : "Non passable and sight blockable. A tile used for debugging.",
 		"color" : [0,0,0],
-		"world layer" : "constructs",
+		"world layer id" : "constructs",
+		"debris" : {
+			"tiles" :{
+				"test_debris" : {
+					"lower amount limit" : 5,
+					"upper amount limit" : 10,
+					"bias to lowest amount" : 0.5,
+					"spread radius" : 5,
+					"bias to center" : 4
+				}
+			}
+		},
 		"flags" : ["BLOCKS_PATH", "BLOCKS_SIGHT"]
+	},
+
+	"test_debris" : {
+		"name" : "test debris",
+		"plural" : "test debris",
+		"icon" : "%",
+		"description" : "Test debris.",
+		"description long" : "Example of what a tile could deposit when it is destroyed.",
+		"color" : [100,100,100],
+		"world layer id" : "constructs",
+		"flags" : []
 	},
 
 	"gray_glass" : {
@@ -109,7 +131,7 @@
 		"description" : "A block of gray glass.",
 		"description long" : "None passable. A tile used for debugging.",
 		"color" : [200,100,100,100],
-		"world layer" : "constructs",
+		"world layer id" : "constructs",
 		"flags" : ["BLOCKS_PATH"]
 	}
 }

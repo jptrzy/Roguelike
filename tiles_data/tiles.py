@@ -3,9 +3,12 @@ import math
 from include import gradient
 import copy
 import json
+from include import bresenham
+import random
+from include import random_addon
 
 class tile(object):
-	def __init__(self, id_, name, plural, icon, description, description_long, color, world_layer, blocks_sight=False, blocks_path=False, ethereal=False):
+	def __init__(self, id_, name, plural, icon, description, description_long, color, world_layer_id, blocks_sight=False, blocks_path=False, ethereal=False, aura=None, debris_data=None):
 		self.id_ = id_
 		self.name = name
 		self.plural = plural
@@ -13,11 +16,63 @@ class tile(object):
 		self.description = description
 		self.description_long = description_long
 		self.color = color
-		self.worldlayer_name = world_layer
+		self.world_layer_id = world_layer_id
 
 		self.blocks_sight = blocks_sight
 		self.blocks_path = blocks_path
 		self.ethereal = ethereal
+		self.aura = aura
+		self.debris_data = debris_data
+
+	def remove(self, y, x, world, game):
+		if self.aura is not None:
+			self.aura._remove_effect()
+			self.aura._remove()
+
+		if self.debris_data is not None:
+			try:
+				debris_tiles = self.debris_data["tiles"]
+				for debris_tile_id in debris_tiles:
+					debris_tile_info = debris_tiles[debris_tile_id]
+					debris_tile_lower_amount_limit = debris_tile_info["lower amount limit"]
+					debris_tile_upper_amount_limit = debris_tile_info["upper amount limit"]
+					debris_tile_bias_to_lowest_amount = debris_tile_info["bias to lowest amount"]
+
+					amount = random_addon.random_integer_in_interval(debris_tile_lower_amount_limit, debris_tile_upper_amount_limit, bias_to_min=debris_tile_bias_to_lowest_amount)
+
+					debris_tile_spread_radius = debris_tile_info["spread radius"]
+					debris_tile_bias_to_center = debris_tile_info["bias to center"]
+					
+					# scatter the debris
+					distance_map = bresenham.get_distance_map(y, x, debris_tile_spread_radius)
+					debris_coordinates = game.FOV.Calculate_Sight(world.path_blockable_coordinates, y, x, debris_tile_spread_radius, distance_map)
+					
+					amount = min(amount, len(debris_coordinates))
+
+					debris_amount = 0
+
+					spawned_coords = set([])
+
+					while debris_amount < amount:
+						distance = random_addon.random_number_in_interval(0, debris_tile_spread_radius, bias_to_min=debris_tile_bias_to_center)
+						select_random_coordinate = set([])
+						
+						for coordinate in debris_coordinates:
+							if abs(distance_map[coordinate] - distance) < 1:
+								if coordinate not in spawned_coords:
+									select_random_coordinate.add(coordinate)
+						
+						# spawn a debris tile
+						if len(select_random_coordinate) > 0:
+							coordinate = random.choice(tuple(select_random_coordinate))
+							game.tile_generator.create_tile(debris_tile_id, coordinate[0], coordinate[1])
+							spawned_coords.add(coordinate)
+						
+						debris_amount += 1
+
+			except KeyError:
+				pass
+
 
 class aura(object):
 	def __init__(self, glow_color, glow_range, glow_str, glow_color_str):
@@ -78,7 +133,7 @@ class aura(object):
 			except KeyError:
 				self.glow_coords[glow_aff_tile_coord] = [self]
 
-			if glow_aff_tile_coord in self.worldmap.blockable_coordinates:
+			if glow_aff_tile_coord in self.worldmap.sight_blockable_coordinates:
 				data = {}
 				for i in range(16):
 					data[i] = False # not illuminated
@@ -92,7 +147,7 @@ class aura(object):
 						if check_octant % 2 == 0:
 							y_fac = self.worldmap.octant_coords[check_octant][0]
 							x_fac = self.worldmap.octant_coords[check_octant][1]
-							if (glow_aff_tile_coord[0] + y_fac, glow_aff_tile_coord[1] + x_fac) in self.worldmap.blockable_coordinates:
+							if (glow_aff_tile_coord[0] + y_fac, glow_aff_tile_coord[1] + x_fac) in self.worldmap.sight_blockable_coordinates:
 								break
 							else:
 								data[check_octant] = True
@@ -102,17 +157,10 @@ class aura(object):
 				self.blockable_data[glow_aff_tile_coord] = data
 
 	def _recalc_distance_map(self):
-		glowtopy = self.y - self.glow_range
-		glowtopx = self.x - self.glow_range
-
-		self.g_distance_map = {}
-
-		for i in range(-1, self.glow_range*2 + 2):
-			for n in range(-1, self.glow_range*2 + 2):
-				self.g_distance_map[(glowtopy + i, glowtopx + n)] = math.hypot(self.x - glowtopx - n, self.y - glowtopy - i)
+		self.g_distance_map = bresenham.get_distance_map(self.y, self.x, self.glow_range)
 
 	def _cast_light(self): # use when opaque tile moves; must use _recalc_distance_map when source moves as well
-		self.glow_aff_tiles_coords = self.FOV.Calculate_Sight(self.worldmap.blockable_coordinates, self.y, self.x, self.glow_range, self.g_distance_map)
+		self.glow_aff_tiles_coords = self.FOV.Calculate_Sight(self.worldmap.sight_blockable_coordinates, self.y, self.x, self.glow_range, self.g_distance_map)
 
 	def _move(self, y, x):
 		self._remove_effect()
