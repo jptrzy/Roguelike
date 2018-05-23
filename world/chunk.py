@@ -14,114 +14,7 @@ from mobs import mobs
 from include import gradient
 
 import time
-"""
-World layers (from lowest to highest):
-- terrain
-- constructs
-- mobs
-"""
-
-class worldlayer(object):
-	def __init__(self, worldmap, name, max_objects=1):
-		self.worldmap = worldmap
-		self.name = name
-		self.max_objects = max_objects # max number of objects that can occupy a coordinate space in the layer
-
-		self.tiles = {} # dictionary: { (y, x) : number of objects }
-		self.layer_group = self.worldmap.layers
-
-	def add_tile(self, y, x): # checks if the tile is occupied DOES NOT CHECK IF BLOCKABLE
-		try:
-			if self.tiles[(y, x)] + 1 > self.max_objects:
-				successful = False
-			else:
-				self.tiles[(y, x)] += 1
-				successful = True
-
-		except KeyError:
-			self.tiles[(y, x)]  = 1
-			successful = True
-
-		return successful
-
-	def delete_tile(self, y, x):
-		try:
-			self.tiles[(y, x)] -= 1
-		except KeyError:
-			return
-
-class layer_tracker(object):
-	def __init__(self, worldmap):
-		self.worldmap = worldmap
-
-		self.worldlayers_count = 0
-
-		self.worldlayers = {}     # dictionary: { "world layer name" : world layer object, ... }
-		self.tiles = {}           # dictionary: { (y, x) : [tile1, tile2, tile3, ... ], ... }
-
-		self.visible_tiles_info = {} # dictionary of tile data as specified in worldmap.recalc_view
-
-		self.windows = windows.panel(self.worldmap.w_ylen, self.worldmap.w_xlen, 1, 10)
-
-		self.windows.add_win(self.worldlayers_count+1, "top")
-
-	def add_layer(self, name, max_objects=1):
-		new_worldlayer = worldlayer(self.worldmap, name, max_objects)
-		self.worldlayers[new_worldlayer.name] = new_worldlayer
-		self.worldlayers_count += 1
-		new_worldlayer.window = self.windows.add_win(self.worldlayers_count, new_worldlayer.name)
-
-		self.recalc_top_window()
-
-	def recalc_top_window(self):
-		self.windows.del_win("top")
-		self.windows.add_win(self.worldlayers_count+1, "top")
-
-	def add_tile(self, y, x, tile):
-		tile.worldlayer = self.worldlayers[tile.worldlayer_name]
-		if not tile.worldlayer.add_tile(y, x):
-			successful = False
-		else:
-			# worldlayer able to store object, now check other conditions
-			if (not tile.ethereal) and (not self.worldmap.check_passable(y, x)):
-				successful = False
-			else:
-				# tile able to be placed
-				try:
-					self.tiles[(y, x)].append(tile)
-				except KeyError:
-					self.tiles[(y, x)] = [tile]
-
-				successful = True
-
-		if successful:
-			self.recalculate_space(y, x)
-
-		return successful
-
-	def delete_tile(self, y, x, tile):
-		try:
-			self.tiles[(y, x)].remove(tile)
-			tile.worldlayer.delete_tile(y, x)
-			successful = True
-		except KeyError:
-			successful = False
-
-		if successful:
-			self.recalculate_space(y, x)
-
-		return successful
-
-	def recalculate_space(self, y, x):
-		self.worldmap.recalc_blockable(y, x)
-
-
-	def get_tiles(self, y, x):
-		# returns a list of all tiles within the space
-		try:
-			return self.tiles[(y, x)]
-		except KeyError:
-			return None
+import layers
 
 class worldmap(object):
 	def __init__(self, game, ylen, xlen, gametype):
@@ -138,15 +31,8 @@ class worldmap(object):
 		self.tmap = []
 		self.cmap = []
 
-		# initialize layers
-		self.layers = layer_tracker(self)
-		self.layers.add_layer('terrain', max_objects=1)
-		self.layers.add_layer('constructs', max_objects=1)
-		self.layers.add_layer('mobs', max_objects=1)
-		self.layers.add_layer('example objects', max_objects=10)
-
-
-		self.blockable_coordinates = set([])        #sight block map
+		self.sight_blockable_coordinates = set([])        #sight block map
+		self.path_blockable_coordinates = set([])         #path block map
 
 		self.aura_group = {}      #aura_group, glow_coords
 
@@ -188,6 +74,11 @@ class worldmap(object):
 		self.w_ylen = w_ylen
 		self.layers.windows.resize(self.w_ylen, self.w_xlen)
 		self.layers.windows.move(y, x)
+
+	def initlayers(self, path_to_layer_data):
+		self.layers = layers.layer_tracker(self, self.game)
+		self.layers.re_path(path_to_layer_data)
+		self.layers.init_layers()
 
 	def initworld(self):
 		### init grid
@@ -275,7 +166,7 @@ class worldmap(object):
 			#{ (window coords) : [[tile1, tile_color1], ... ] }
 			for tile_data in self.layers.visible_tiles_info[tilecoord]:
 				current_tile = tile_data[0]
-				self.layers.windows.get_win(current_tile.worldlayer.name).put(tilecoord[0], tilecoord[1], current_tile.icon, tile_data[1])
+				self.layers.windows.get_win(current_tile.worldlayer.id_).put(tilecoord[0], tilecoord[1], current_tile.icon, tile_data[1])
 
 		#p print("print view: --- %s seconds ---" % (time.clock() - time_3))
 		#p print("--------------------------------------------------------")
@@ -294,16 +185,8 @@ class worldmap(object):
 
 		sight = character.sight_range.value
 
-		rendy = locy - sight
-		rendx = locx - sight
-
-		self.distance_map = {} # stores tiles distance from player
-
-		for i in range(-1, sight*2 + 2):
-			for n in range(-1, sight*2 + 2):
-				self.distance_map[(rendy + i, rendx + n)] = math.hypot(locx - rendx - n, locy - rendy - i)
-
-		self.visible_coords = self.game.FOV.Calculate_Sight(self.blockable_coordinates, locy, locx, sight, self.distance_map)
+		self.distance_map = bresenham.get_distance_map(locy, locx, sight)
+		self.visible_coords = self.game.FOV.Calculate_Sight(self.sight_blockable_coordinates, locy, locx, sight, self.distance_map)
 
 		
 		#p print("FOV render: --- %s seconds ---" % (time.clock() - time_1))
@@ -425,23 +308,35 @@ class worldmap(object):
 		#self.minimapprint(mapy, mapx)                             #------------------------------------------------------------------------------
 
 	def recalc_blockable(self, tiley, tilex):       # recalc blockable
-		blocked = False
+		sight_blocked = False
+		path_blocked = False
 		try:
 			for tile in self.layers.tiles[(tiley, tilex)]:
 				if tile.blocks_sight:
-					blocked = True
+					sight_blocked = True
+					break
+			for tile in self.layers.tiles[(tiley, tilex)]:
+				if tile.blocks_path:
+					path_blocked = True
 					break
 		except KeyError:
 			pass
 
-		if blocked:
-			if (tiley, tilex) not in self.blockable_coordinates:
+		if sight_blocked:
+			if (tiley, tilex) not in self.sight_blockable_coordinates:
 				# only change if necessary
-				self.blockable_coordinates.add((tiley, tilex))
+				self.sight_blockable_coordinates.add((tiley, tilex))
 				self.glow_coords._recast((tiley, tilex))
 		else:
-			if self.blockable_coordinates.discard((tiley, tilex)) != None:
+			if self.sight_blockable_coordinates.discard((tiley, tilex)) is not None:
 				self.glow_coords._recast((tiley, tilex))
+
+		if path_blocked:
+			if (tiley, tilex) not in self.path_blockable_coordinates:
+				self.path_blockable_coordinates.add((tiley, tilex))
+		else:
+			if self.path_blockable_coordinates.discard((tiley, tilex)) is not None:
+				pass # add additional stuff here later
 
 	def check_passable(self, y, x):
 		try:
