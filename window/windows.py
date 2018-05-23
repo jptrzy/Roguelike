@@ -689,6 +689,8 @@ class text_input_popup(text_popup):
 		self.close()
 		terminal.refresh()
 		if self.return_reply:
+			if len(self.reply) == 0:
+				return None
 			return ''.join(self.reply)
 		else:
 			return None
