@@ -13,10 +13,13 @@ from window import windows
 
 class wizard_commands(object):
 	def __init__(self):
-		pass
+		self.prev_request = 'help'
 
 	def process_request(self, request, game):
 		request = request.split()
+
+		if request[0] == '\\':
+			request = self.prev_request
 
 		if request[0] == 'help':
 			pass
@@ -41,6 +44,45 @@ class wizard_commands(object):
 			game.tile_generator.create_tile(tile_id, game.me.y+y, game.me.x+x)
 			game.update_screen()
 
+		if request[0] == 'destroy':
+			try:
+				y, x = int(request[1]), int(request[2])
+			except:
+				y, x = self.prompt_coordinates(game)
+			destructable_tiles = game.world.layers.get_destructable_tiles(game.me.y+y, game.me.x+x)
+
+			if len(destructable_tiles) == 0:
+				windows.pure_text_popup(("No destructable tiles found.", [255,0,0]), game=game)
+			else:
+				options = []
+
+				for tile in destructable_tiles:
+					options.append(tile.name)
+
+				destroy_prompt = windows.scroll_selection_popup("Destroy which tile?", options, game=game)
+				destroy_tile_name = destroy_prompt.init()
+
+				if destroy_tile_name is not None:
+					destroy_tile = next((tile for tile in destructable_tiles if tile.name == destroy_tile_name), None)
+
+				game.world.layers.delete_tile(game.me.y+y, game.me.x+x, destroy_tile)
+				game.update_screen()
+
+		self.prev_request = request
+
+	def prompt_coordinates(self, game):
+		while True:
+			prompt_coordinates = windows.text_input_popup("Enter relative y and x coordinates (separate by space):", game=game, only_ascii=False)
+			coordinates = prompt_coordinates.init().split()
+
+			try:
+				y, x = int(coordinates[0]), int(coordinates[1])
+				break
+			except:
+				windows.pure_text_popup(("Please enter two valid numerical coordinates.", (255,0,0)),game=game)
+
+		return y, x
+
 	def create_obj(self, game, request, generator):
 		# "spawn", "spawn id_ y x", "spawn id_"
 		id_ = ''
@@ -55,15 +97,7 @@ class wizard_commands(object):
 		try:
 			y, x = int(request[2]), int(request[3])
 		except:
-			while True:
-				prompt_coordinates = windows.text_input_popup("Enter relative y and x coordinates (separate by space):", game=game, only_ascii=False)
-				coordinates = prompt_coordinates.init().split()
-
-				try:
-					y, x = int(coordinates[0]), int(coordinates[1])
-					break
-				except:
-					windows.pure_text_popup(("Please enter two valid numerical coordinates.", (255,0,0)),game=game)
+			y, x = self.prompt_coordinates(game)
 
 		return id_, y, x
 		
