@@ -118,27 +118,65 @@ def draw_line(start, end, map, topy, topx, tiles):
 						x += adjust
 						rang += 1
 
-def distance(start, end, goal):
-	d = ((start[1] - end[1])**2 + (start[0] - end[0])**2)**0.5
-	if math.ceil(d) == goal or math.floor(d) == goal:
-	#if d <= goal:
-		return True
-	else:
-		return False
+def get_distance_map(y_i, x_i, radius):
+	# returns a distance dictionary of coordinates within a radius*2+1 wide square area
+	coords = {} # dictionary { (y, x) : distance from center }
 
-def distance_lower_than(start, end, goal, limit=0):
-	d = ((start[1] - end[1])**2 + (start[0] - end[0])**2)**0.5
-	if math.floor(d) <= goal or math.floor(d) <= limit:
-		return True
-	else:
-		return False
+	for y in range(-1*radius, radius+1):
+		for x in range(-1*radius, radius+1):
+			coords[(y_i+y, x_i+x)] = (x*x+y*y)**0.5
 
-def area_distance(start, end, goal):
-	d = ((start[1] - end[1])**2 + (start[0] - end[0])**2)**0.5
-	if math.ceil(d) <= goal:
-		return True
-	else:
-		return False
+	return coords
 
-def calc_distance(start, end):
-	return ((start[1] - end[1])**2 + (start[0] - end[0])**2)**0.5
+def get_circle(y_i, x_i, radius):
+	# returns all coordinates radius away from (y, x)
+	coords = set([])
+
+	x = radius - 1
+	y = 0
+
+	dx, dy = 1, 1
+	error = dx - radius*2
+
+	while x >= y:
+		coords.add((y_i+y, x_i+x))
+		coords.add((y_i-y, x_i+x))
+		coords.add((y_i-y, x_i-x))
+		coords.add((y_i+y, x_i-x))
+		coords.add((y_i+x, x_i+y))
+		coords.add((y_i-x, x_i+y))
+		coords.add((y_i-x, x_i-y))
+		coords.add((y_i+x, x_i-y))
+
+		if error <= 0:
+			y += 1
+			error += dy
+			dy += 2
+		else:
+			x -= 1
+			error += dx - radius*2
+			dx += 2
+
+	return coords
+
+def get_fill_circle(y_i, x_i, radius):
+	# returns all coordinates within a radius distance from (y_i, x_i)
+	coords = set([])
+
+	for y in range(-1*radius, radius+1):
+		for x in range(-1*radius, radius+1):
+			if x*x + y*y <= radius*radius:
+				coords.add((y_i+y, x_i+x))
+
+	return coords
+
+def get_fill_circle_distance(y_i, x_i, radius):
+	# returns a dictionary of coordinates within a radius distance from (y_i, x_i) and its distance
+	coords = {} # dictionary: { (y, x) : distance }
+
+	for y in range(-1*radius, radius+1):
+		for x in range(-1*radius, radius+1):
+			if x*x + y*y <= radius*radius:
+				coords[(y_i+y, x_i+x)] = (x*x+y*y)**0.5
+
+	return coords
