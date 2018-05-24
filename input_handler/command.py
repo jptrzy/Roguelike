@@ -45,6 +45,7 @@ class commands_handler(object):
 
 		if uinput == terminal.TK_ESCAPE:
 			game.proceed = False
+
 		elif uinput in self.move.keys():
 			#p movement_time = time.clock()
 
@@ -57,26 +58,7 @@ class commands_handler(object):
 				else:
 					move_action = action.a_Walk
 
-				game.update(move_action._calc_prep_time(game.me.speed.value))
-
-				if game.world.check_passable(newy, newx) or uinput == terminal.TK_R:
-					game.me.remove()
-					game.me.add(newy, newx)
-					if game.me.emit:
-						game.me.aura._move(newy, newx)
-
-					game.world.recalcloc(game.me.mapy, game.me.mapx)
-				
-					game.me.stamina.alter(-move_action.stamina_cost)
-
-				else:
-					game.message_panel.add_phrase('Something blocked your path!', [255,0,0])
-					game.message_panel.print_messages()
-
-				game.update(move_action._calc_recover_time(game.me.speed.value))
-
-				game.update_screen()
-
+				game.me.do_action(move_action, (game.me, newy, newx), game)
 			else:
 				game.message_panel.add_phrase('Cannot move there.', [255,0,0])
 				game.message_panel.print_messages()
@@ -85,7 +67,7 @@ class commands_handler(object):
 
 		elif uinput == terminal.TK_W:
 			time_advance = 100
-			game.update(time_advance)
+			game.update(game.timer.time+time_advance)
 			game.update_screen()
 			game.message_panel.add_phrase('Time advanced by ' + str(time_advance))
 			game.message_panel.print_messages()
@@ -136,23 +118,7 @@ class commands_handler(object):
 
 				attack_action = action.a_smite
 
-				game.update(attack_action._calc_prep_time(game.me.speed.value))
-				
-				if game.me.stamina.value >= attack_action.stamina_cost:
-					attack_action.do(game, game.me, attack_y, attack_x, game.all_mobs.mob_lib)
-					game.me.stamina.alter(-attack_action.stamina_cost)
-				else:
-					game.message_panel.add_phrase("Not enough stamina!")
-					game.message_panel.print_messages()
-				
-				game.update(attack_action._calc_recover_time(game.me.speed.value))
-
-				game.update_screen()
-
-
-
-
-
+				game.me.do_action(attack_action, (game.me, attack_y, attack_x, game.all_mobs.mob_lib), game)
 
 		# other possibilities
 		elif uinput == terminal.TK_RESIZED:

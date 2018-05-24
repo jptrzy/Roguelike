@@ -27,7 +27,7 @@ class wizard_commands(object):
 		if request[0] == 'wait':
 			try:
 				time_advance = int(request[1])
-				game.update(time_advance)
+				game.update(game.timer.time+time_advance)
 				game.update_screen()
 				game.message_panel.add_phrase('Time advanced by ' + str(time_advance))
 				game.message_panel.print_messages()	

@@ -102,12 +102,19 @@ class living(object):
 					dynam_stat.color_info[n][i] = int(0.7*dynam_stat.color_info[n][i])
 
 	def move_to_cord(self, y, x):
+		successful = False
 		if not (y, x) in self.group.mob_lib:
 			if (self.ethereal) or ((not self.ethereal) and (self.worldmap.check_passable(y, x))):
+				old_mapy = self.mapy
+				old_mapx = self.mapx
 				self.remove()
 				self.add(y, x)
+				self.re_calculate_chunk_info(old_mapy, old_mapx)
 				if self.emit:
 					self.aura._move(y, x)
+				successful = True
+
+		return successful
 
 	def remove(self):
 		self.worldmap.layers.delete_tile(self.y, self.x, self.tile)
@@ -256,14 +263,9 @@ class mob(living):
 			self.mob_group.mobs[(self.mapy, self.mapx)] = []
 			self.mob_group.mobs[(self.mapy, self.mapx)].append(self)
 
-	def move_to_cord(self, y, x):
-		update_chunk = False
-		if self.mapy != self.worldmap.get_mapy(y) or self.mapx != self.worldmap.get_mapx(x):
-			self.mob_group.mobs[(self.mapy, self.mapx)].remove(self)
-			update_chunk = True
-
-		super(mob, self).move_to_cord(y, x) # changes mapy and mapx here
-		if update_chunk:
+	def re_calculate_chunk_info(self, old_mapy, old_mapx):
+		if old_mapy != self.worldmap.get_mapy(self.y) or old_mapx != self.worldmap.get_mapx(self.x):
+			self.mob_group.mobs[(old_mapy, old_mapx)].remove(self)
 			self.re_add_chunk_group()
 
 	def die(self, game):

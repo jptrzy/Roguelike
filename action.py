@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*- 
 
 class Action(object):
-	def __init__(self, cast_time, recover_time):
+	def __init__(self, cast_time, recover_time, stamina_cost):
 
 		self.cast_time = cast_time
 		self.recover_time = recover_time
+		self.stamina_cost = stamina_cost
 
 	def _calc_prep_time(self, speed):
 		return float(self.cast_time) / (float(speed) / 100)
@@ -18,15 +19,29 @@ class Action(object):
 		mob.update_stage = 1
 
 class Movement_Action(Action):
-	def __init__(self, cast_time, recover_time, stamina_cost):
-		Action.__init__(self, cast_time, recover_time)
-		self.stamina_cost = stamina_cost
+	def __init__(self, cast_time, recover_time, stamina_cost, range):
+		Action.__init__(self, cast_time, recover_time, stamina_cost)
+		self.range = range
 
 	def do(self, game, mob, y, x):
-		mob.move_to_cord(y, x)
-		mob.stamina.alter(-self.stamina_cost)
+		successful = False
+		return_message = None
+
+		if mob.stamina.value - self.stamina_cost > 0:
+			if mob.move_to_cord(y, x):
+				successful = True
+				mob.stamina.alter(-self.stamina_cost)
+			else:
+				return_message = "Something blocked your path!"
+		else:
+			return_message = "Not enough stamina!"
+		
 		mob.update_stage = 2
+
+		# might want to change this to something different if not successful (ex. only half the recover time?)
 		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
+
+		return successful, return_message
 
 class Idle_Action(Action):
 	def __init__(self):
@@ -38,32 +53,39 @@ class Idle_Action(Action):
 
 class Attack(Action):
 	def __init__(self, cast_time, recover_time, stamina_cost, damage):
-		Action.__init__(self, cast_time, recover_time)
-		self.stamina_cost = stamina_cost
+		Action.__init__(self, cast_time, recover_time, stamina_cost)
 		self.damage = damage
 
 	def do(self, game, mob, attack_y, attack_x, mob_dictionary):
 		successful = True
-		try:
-			attack_this_mob = mob_dictionary[(attack_y, attack_x)]
-			attack_this_mob.health.alter(-self.damage)
-			if attack_this_mob.health.value == 0:
-				attack_this_mob.die(game)
+		return_message = None
 
-		except KeyError:
-			successful = False # -----------------------------------------------        
+		if mob.stamina.value - self.stamina_cost > 0:
+			try:
+				attack_this_mob = mob_dictionary[(attack_y, attack_x)]
+				attack_this_mob.health.alter(-self.damage)
+				if attack_this_mob.health.value == 0:
+					attack_this_mob.die(game)
+
+			except KeyError:
+				successful = False
+				return_message = "You don't hit anything!"
+
+			mob.stamina.alter(-self.stamina_cost)
+
+		else:
+			successful = False
+			return_message = "Not enough stamina!"
 
 		mob.update_stage = 2
+
+		# might want to change this to something different if not successful (ex. only half the recover time?)
 		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
 
-		game.update_screen()
+		return successful, return_message
 
-		return successful
-
-a_Walk = Movement_Action(0.1, 1, 0.2)
-a_Sprint = Movement_Action(0.1, 0.5, 3)
-
-a_Idle = Idle_Action()
+a_Walk = Movement_Action(0.1, 1, 0.2, 1)
+a_Sprint = Movement_Action(0.1, 0.5, 3, 1)
 
 a_testAttack = Attack(0.1, 2, 5, 10)
 a_smite = Attack(cast_time=0.1, recover_time=2, stamina_cost=5, damage=10000000)

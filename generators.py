@@ -3,6 +3,7 @@ from tiles_data import tiles
 from mobs import mobs
 from window import windows
 import items
+import action
 
 
 
@@ -160,12 +161,42 @@ class mob_generator(object):
 		
 		return successful
 
+class action_generator(object):
+	def __init__(self, game):
+		self.game = game
+
+	def re_path(self, path_to_action_data):
+		with open(path_to_action_data) as file:
+			self.data = json.load(file)
+
+	def create_action_from_id(self, id_):
+		try:
+			action_data = self.data[id_]
+		except KeyError:
+			action_data = self.data["walk"]
+
+		action_type = action_data["type"]
+		action_name = action_data["name"] 
+		action_description = action_data["description"]
+		action_cast_time = action_data["cast_time"] 
+		action_recover_time = action_data["recover_time"]
+		action_stamina_cost = action_data["stamina_cost"]
+
+		action_flags = action_data["flags"]
+
+		if action_type == "movement":
+			action_range = action_data["range"]
+			action_obj = action.Movement_Action(cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, range=action_range)
+
+		if action_type == "melee attack":
+			action_damage = action_data["damage"]
+
 class item_generator(object):
 	def __init__(self, game):
 		self.game = game
 
-	def re_path(self, path_to_mob_data):
-		with open(path_to_mob_data) as file:
+	def re_path(self, path_to_item_data):
+		with open(path_to_item_data) as file:
 			self.data = json.load(file)
 
 	def create_item_from_id(self, id_):

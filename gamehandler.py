@@ -198,10 +198,10 @@ class Game(object):
 
 			terminal.refresh()
 
-	def update(self, time_increase=0):
+	def update(self, next_update_time):
 		# only use this function when advancing time for player.
 
-		self.next_update_time = self.timer.time + time_increase
+		self.next_update_time = next_update_time
 		#timerp print "======================"
 		#timerp print ">> current time: " + str(self.timer.time)+". next update time at: " + str(self.next_update_time)
 		self.all_mobs.update(self)

@@ -1,0 +1,45 @@
+{
+	"walk" : {
+		"type" : "movement",
+		"name" : "Walk",
+		"description" : "Take one step.",
+		"cast_time" : 0.1,
+		"recover_time" : 1,
+		"stamina_cost" : 10,
+		"range" : 1,
+		"flags" : []
+	},
+
+	"sprint" : {
+		"type" : "movement",
+		"name" : "Sprint",
+		"description" : "Sprint across one step.",
+		"cast_time" : 0.05,
+		"recover_time" : 0.5,
+		"stamina_cost" : 25,
+		"range" : 1,
+		"flags" : []
+	},
+
+	"punch" : {
+		"type" : "melee attack",
+		"name" : "Punch",
+		"description" : "Throw a weak punch.",
+		"cast_time" : 0.1,
+		"recover_time" : 2,
+		"stamina_cost" : 30,
+		"damage" : 5,
+		"flags" : []
+	},
+
+	"smite" : {
+		"type" : "melee attack",
+		"name" : "Smite",
+		"description" : "Obliterate a foe. Used for debugging.",
+		"cast_time" : 0,
+		"recover_time" : 0,
+		"stamina_cost" : 10,
+		"damage" : 1000000000000000000000000000000000000000,
+		"flags" : []
+	},
+}

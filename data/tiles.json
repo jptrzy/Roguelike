@@ -102,11 +102,11 @@
 		"debris" : {
 			"tiles" :{
 				"test_debris" : {
-					"lower amount limit" : 5,
-					"upper amount limit" : 10,
+					"lower amount limit" : 3,
+					"upper amount limit" : 5,
 					"bias to lowest amount" : 0.5,
-					"spread radius" : 5,
-					"bias to center" : 4
+					"spread radius" : 4,
+					"bias to center" : 10
 				}
 			}
 		},
