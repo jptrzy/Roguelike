@@ -180,10 +180,6 @@ class Game(object):
 			self.world.view()
 			self.all_mobs.print_mob_data(self)
 
-	def recalc_input(self, time_amount):
-		self.timer.recalc(time_amount, self)
-		self.all_mobs.update(self)
-
 	def update_screen(self):
 		if self.proceed:
 			#p self.world.start_time = time.clock()
@@ -207,7 +203,9 @@ class Game(object):
 		self.all_mobs.update(self)
 		
 		self.all_mobs.recalc_visible_mobs(self)
-		self.timer.change_time(self.next_update_time, self)
+
+		if self.timer.time != self.next_update_time:
+			self.timer.change_time(self.next_update_time, self)
 		#timerp print "======================"
 
 	def refresh(self, time_increase=0):

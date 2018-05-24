@@ -41,8 +41,6 @@ class timer(object):
 		self.time = float(changed_time)
 		time_elapsed = self.time - self.last_updated_time
 
-		print "time elapsed by " + str(time_elapsed)
-
 		# update
 		for mob in game.all_mobs.mob_set | set([game.me]):
 			for dynam_stat in mob.dynam_stats:

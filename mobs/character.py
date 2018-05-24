@@ -48,9 +48,10 @@ class character(living):
 		if not successful:
 			game.message_panel.add_phrase(message, [255,0,0])
 			game.message_panel.print_messages()
-		game.update_screen()
 
 		game.update(self.next_update_time)
+
+		game.update_screen()
 
 	def re_calculate_chunk_info(self, old_mapy, old_mapx):
 		if old_mapy != self.worldmap.get_mapy(self.y) or old_mapx != self.worldmap.get_mapx(self.x):
