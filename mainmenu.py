@@ -93,6 +93,8 @@ class main_menu(object):
 			saves = filter(os.path.isfile, os.listdir('.'))
 			saves.sort(key=lambda x: os.path.getmtime(x))
 			saves = saves[::-1]
+			for i, save_name in enumerate(saves):
+				saves[i] = save_name.split('.')[0]
 			os.chdir('..')
 			
 			if self.choices[self.choice] == new_game_option:
