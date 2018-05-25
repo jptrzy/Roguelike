@@ -24,6 +24,9 @@ class wizard_commands(object):
 		if request[0] == 'help':
 			pass
 
+		if request[0] in ['die', 'suicide']:
+			game.me.die(game)
+
 		if request[0] == 'wait':
 			try:
 				time_advance = int(request[1])
