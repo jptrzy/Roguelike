@@ -59,12 +59,17 @@ class Game(object):
 				self.commandframe.command(uinput, self)
 			#p print("total time: --- %s seconds ---" % (time.clock() - total_time))
 
+		self.close()
+
 		return not self.die
 
 	def game_over(self):
 		self.die = True
 		self.proceed = False
 		windows.pure_text_popup("Rest in peace.", game=self)
+
+	def close(self):
+		pass
 
 	def start_game(self, preferences):
 		self.die = False
