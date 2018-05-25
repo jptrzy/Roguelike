@@ -23,12 +23,26 @@ class aura_generator(object):
 class tile_generator(object):
 	def __init__(self, game):
 		self.game = game
+		self.tiles = {} # dictionary of non-dynamic tiles: { tile_id : tile_obj }
 
 	def re_path(self, path_to_tile_data):
 		with open(path_to_tile_data) as file:
 			self.data = json.load(file)
 
 	def create_tile_from_data(self, tile_data, tile_id):
+		# flags
+		tile_flags = tile_data["flags"]
+		tile_dynamic = "DYNAMIC" in tile_flags
+
+		if not tile_dynamic:
+			if tile_id in self.tiles:
+				return self.tiles[tile_id]
+
+		tile_blocks_sight = "BLOCKS_SIGHT" in tile_flags
+		tile_blocks_path = "BLOCKS_PATH" in tile_flags
+		tile_ethereal = "ETHEREAL" in tile_flags
+
+		# standard data
 		tile_name = tile_data["name"]
 		tile_plural = tile_data["plural"]
 		tile_icon = tile_data["icon"]
@@ -46,13 +60,10 @@ class tile_generator(object):
 		except KeyError:
 			debris_data = None
 
-		# flags
-		tile_flags = tile_data["flags"]		
-		tile_blocks_sight = "BLOCKS_SIGHT" in tile_flags
-		tile_blocks_path = "BLOCKS_PATH" in tile_flags
-		tile_ethereal = "ETHEREAL" in tile_flags
-
 		tile_obj = tiles.tile(id_=tile_id, name=tile_name, plural=tile_plural, icon=tile_icon, description=tile_description, description_long=tile_description_long, color=tile_color, world_layer_id=tile_world_layer_id, blocks_sight=tile_blocks_sight, blocks_path=tile_blocks_path, ethereal=tile_ethereal, aura=None, debris_data=debris_data)
+
+		if not tile_dynamic:
+			self.tiles[tile_id] = tile_obj
 
 		return tile_obj
 
@@ -63,7 +74,10 @@ class tile_generator(object):
 			tile_id = "error tile"
 			tile_data = self.data[tile_id]
 
-		tile_obj = self.create_tile_from_data(tile_data, tile_id)
+		if tile_id in self.tiles:
+			tile_obj = self.tiles[tile_id]
+		else:
+			tile_obj = self.create_tile_from_data(tile_data, tile_id)
 
 		# aura
 		try:
@@ -138,6 +152,8 @@ class mob_generator(object):
 
 		if not mob_ethereal:
 			mob_tile_data["flags"].append("BLOCKS_PATH")
+
+		mob_tile_data["flags"].append("DYNAMIC")
 
 		# aura
 		try:
