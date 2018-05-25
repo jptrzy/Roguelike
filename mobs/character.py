@@ -36,11 +36,13 @@ class character(living):
 			for n in range(self.window.xlen):
 				self.window.put(1+i, n, u'█', stat_bar[n])
 
-			stat_amt = str(dynam_stat.value) + '/' + str(dynam_stat.max)
+			stat_amt = str(int(dynam_stat.value)) + '/' + str(dynam_stat.max)
 
 			self.window.wprint(1+i, self.window.xlen // 2 -len(stat_amt)/2, stat_amt)
 
-	def do_action(self, action, action_args, game):
+	def do_action(self, action_id, action_args, game):
+		action = game.action_generator.get_action_from_id(action_id)
+
 		action.prep(self, game.timer.time)
 		
 		game.update(self.next_update_time)

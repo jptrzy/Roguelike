@@ -180,12 +180,15 @@ class mob_generator(object):
 class action_generator(object):
 	def __init__(self, game):
 		self.game = game
+		self.actions = {} # dictionary: { action id : action obj }
 
 	def re_path(self, path_to_action_data):
 		with open(path_to_action_data) as file:
 			self.data = json.load(file)
 
-	def create_action_from_id(self, id_):
+	def get_action_from_id(self, id_):
+		if id_ in self.actions:
+			return self.actions[id_]
 		try:
 			action_data = self.data[id_]
 		except KeyError:
@@ -204,8 +207,12 @@ class action_generator(object):
 			action_range = action_data["range"]
 			action_obj = action.Movement_Action(cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, range=action_range)
 
-		if action_type == "melee attack":
+		elif action_type == "melee attack":
 			action_damage = action_data["damage"]
+			action_obj = action.Melee_Attack(cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, damage=action_damage)
+
+		self.actions[id_] = action_obj
+		return action_obj
 
 class item_generator(object):
 	def __init__(self, game):

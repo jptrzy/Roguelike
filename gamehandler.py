@@ -132,8 +132,10 @@ class Game(object):
 		self.tile_generator = generators.tile_generator(self)
 		self.aura_generator = generators.aura_generator(self)
 		self.mob_generator = generators.mob_generator(self)
+		self.action_generator = generators.action_generator(self)
 		self.tile_generator.re_path("./data/tiles.json")
 		self.mob_generator.re_path("./data/mobs.json")
+		self.action_generator.re_path("./data/action.json")
 
 		### generate new world
 		self.world = chunk.worldmap(self, 100, 100, 'World')

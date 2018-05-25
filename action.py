@@ -51,7 +51,7 @@ class Idle_Action(Action):
 		mob.update_stage = 2
 		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
 
-class Attack(Action):
+class Melee_Attack(Action):
 	def __init__(self, cast_time, recover_time, stamina_cost, damage):
 		Action.__init__(self, cast_time, recover_time, stamina_cost)
 		self.damage = damage
@@ -83,9 +83,3 @@ class Attack(Action):
 		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
 
 		return successful, return_message
-
-a_Walk = Movement_Action(0.1, 1, 0.2, 1)
-a_Sprint = Movement_Action(0.1, 0.5, 3, 1)
-
-a_testAttack = Attack(0.1, 2, 5, 10)
-a_smite = Attack(cast_time=0.1, recover_time=2, stamina_cost=5, damage=10000000)

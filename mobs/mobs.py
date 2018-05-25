@@ -35,7 +35,7 @@ class stat(object):
 		self.value = int(math.floor(self.value))
 
 class dynamic_stat(stat):
-	def __init__(self, max_amt, color_info, regen_rate=1, buffs=[], multipliers=[]):
+	def __init__(self, max_amt, color_info, regen_rate=0.1, buffs=[], multipliers=[]):
 		stat.__init__(self, max_amt, buffs, multipliers)
 		self.max = max_amt
 		self.color_info = color_info
@@ -174,8 +174,6 @@ class mob(living):
 
 		self.update_stage = 0
 
-		self.actions = set([action.a_Walk, action.a_Sprint])
-
 		self.current_action = None
 
 	def check_update_time(self, next_update_time):
@@ -212,7 +210,8 @@ class mob(living):
 			if (d_from_player <= self.sense_range.value) or (d_from_player <= self.sight_range and bresenham.check_line((self.y, self.x), (game.me.y, game.me.x), game.world.sight_blockable_coordinates)):
 				if game.world.check_enough_light((self.y, self.x), d_from_player, self):			
 					if d_from_player <= 1.5:
-						action.a_testAttack.prep(self, game.timer.time)
+						action = game.action_generator.get_action_from_id("punch")
+						action.prep(self, game.timer.time)
 						self.action_args = (self, game.me.y, game.me.x, self.mob_group.mob_lib)
 
 						return
@@ -221,7 +220,8 @@ class mob(living):
 							self.path = a_star.pathfind.find_path((self.y, self.x), (game.me.y, game.me.x), game.world, self.determined.value)
 							if self.path:
 								self.action_args = (self, self.path[1][0], self.path[1][1]) # replace y, x
-								action.a_Walk.prep(self, game.timer.time)
+								action = game.action_generator.get_action_from_id("walk")
+								action.prep(self, game.timer.time)
 
 								return
 
@@ -229,7 +229,8 @@ class mob(living):
 		wander_direction = self.noise_gen.get_closest_direction(self.y, self.x)
 		self.action_args = (self, wander_direction[0], wander_direction[1])
 
-		action.a_Walk.prep(self, game.timer.time)
+		action = game.action_generator.get_action_from_id("walk")
+		action.prep(self, game.timer.time)
 
 	def spawn(self, y, x, worldmap, FOV, mob_group, time):
 		if super(mob, self).spawn(y, x, worldmap, FOV, mob_group):

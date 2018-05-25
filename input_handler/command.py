@@ -54,9 +54,9 @@ class commands_handler(object):
 
 			if game.world.check_passable(newy, newx) or uinput == terminal.TK_R:
 				if self.shift_on:
-					move_action = action.a_Sprint
+					move_action = "sprint"
 				else:
-					move_action = action.a_Walk
+					move_action = "walk"
 
 				game.me.do_action(move_action, (game.me, newy, newx), game)
 			else:
@@ -116,7 +116,7 @@ class commands_handler(object):
 				attack_y = game.me.y + self.move[dir][0]
 				attack_x = game.me.x + self.move[dir][1]
 
-				attack_action = action.a_smite
+				attack_action = "smite"
 
 				game.me.do_action(attack_action, (game.me, attack_y, attack_x, game.all_mobs.mob_lib), game)
 
