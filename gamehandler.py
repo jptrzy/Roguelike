@@ -20,8 +20,6 @@ from window import infopanel
 from window import windows
 import generators
 
-import shelve
-
 
 class Game(object):
 	def __init__(self):

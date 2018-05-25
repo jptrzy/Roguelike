@@ -5,6 +5,7 @@ from gamehandler import *
 from mainmenu import *
 from bearlibterminal import terminal
 from window import windows
+import gzip, cPickle
 import os
 
 if __name__ == '__main__':
@@ -32,8 +33,8 @@ if __name__ == '__main__':
 			game = Game()
 			game.gen_new_game(Preferences)
 		elif start_game_mode == 'Load':
-			load_save = shelve.open(".\saves\\"+start_game_file+".dat", 'r')
-			game = load_save['game']
+			load_save = gzip.open(".\saves\\"+start_game_file+".dat", 'rb')
+			game = cPickle.load(load_save)
 			load_save.close()
 		elif start_game_mode == 'Quit':
 			break
@@ -45,8 +46,8 @@ if __name__ == '__main__':
 			ask_save_game_window = windows.yes_or_no_popup('Save game? (y/n)', w_ylen=Preferences.w_ylen, w_xlen=Preferences.w_xlen)
 			ask_save_game = ask_save_game_window.init()
 			if ask_save_game:
-				save_game = shelve.open(".\saves\\"+start_game_file+".dat", 'n')
-				save_game['game'] = game
+				save_game = gzip.open(".\saves\\"+start_game_file+".dat", 'wb')
+				cPickle.dump(game, save_game)
 				save_game.close()
 		else:
 			# delete game file
