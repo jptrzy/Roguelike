@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*- 
 
 class Action(object):
-	def __init__(self, cast_time, recover_time, stamina_cost):
-
+	def __init__(self, id_, cast_time, recover_time, stamina_cost):
+		self.id_ = id_
 		self.cast_time = cast_time
 		self.recover_time = recover_time
 		self.stamina_cost = stamina_cost
@@ -19,8 +19,8 @@ class Action(object):
 		mob.update_stage = 1
 
 class Movement_Action(Action):
-	def __init__(self, cast_time, recover_time, stamina_cost, range):
-		Action.__init__(self, cast_time, recover_time, stamina_cost)
+	def __init__(self, id_, cast_time, recover_time, stamina_cost, range):
+		Action.__init__(self, id_, cast_time, recover_time, stamina_cost)
 		self.range = range
 
 	def do(self, game, mob, y, x):
@@ -43,17 +43,9 @@ class Movement_Action(Action):
 
 		return successful, return_message
 
-class Idle_Action(Action):
-	def __init__(self):
-		Action.__init__(self, 50, 50)
-
-	def do(self, game, mob):
-		mob.update_stage = 2
-		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed.value)
-
 class Melee_Attack(Action):
-	def __init__(self, cast_time, recover_time, stamina_cost, damage):
-		Action.__init__(self, cast_time, recover_time, stamina_cost)
+	def __init__(self, id_, cast_time, recover_time, stamina_cost, damage):
+		Action.__init__(self, id_, cast_time, recover_time, stamina_cost)
 		self.damage = damage
 
 	def do(self, game, mob, attack_y, attack_x, mob_dictionary):
