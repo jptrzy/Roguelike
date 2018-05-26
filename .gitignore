@@ -6,6 +6,10 @@ __pycache__/
 # Saves folder
 /saves/
 
+# Bearlibterminal
+/bearlibterminal/
+BearLibTerminal.dll
+
 # Font
 *.ttf
 
