@@ -71,8 +71,7 @@ class tile_generator(object):
 		try:
 			tile_data = self.data[tile_id]
 		except KeyError:
-			tile_id = "error tile"
-			tile_data = self.data[tile_id]
+			return False
 
 		if tile_id in self.tiles:
 			tile_obj = self.tiles[tile_id]
@@ -115,7 +114,7 @@ class mob_generator(object):
 		try:
 			mob_data = self.data[mob_id]
 		except KeyError:
-			mob_data = self.data["test mob"]
+			return False
 
 		mob_name = mob_data["name"]
 		mob_plural = mob_data["plural"]
@@ -126,6 +125,8 @@ class mob_generator(object):
 			mob_description_long = None
 		mob_health = mob_data["health"]
 		mob_speed = mob_data["speed"]
+		mob_carry_weight = mob_data["carry weight"]
+		mob_carry_volume = mob_data["carry volume"]
 		mob_sight_range = mob_data["sight range"]
 		mob_stamina = mob_data["stamina"]
 		mob_hunger = mob_data["hunger"]
@@ -133,6 +134,10 @@ class mob_generator(object):
 		mob_mana = mob_data["mana"]
 		mob_sense_range = mob_data["sense range"]
 		mob_determined = mob_data["determined"]
+		mob_actions = mob_data["actions"]
+		# convert actions to objects
+		for i, action_id in enumerate(mob_actions):
+			mob_actions[i] = self.game.action_generator.get_action_from_id(action_id)
 
 		# flags
 		mob_flags = mob_data["flags"]
@@ -166,7 +171,7 @@ class mob_generator(object):
 
 		mob_tile = self.game.tile_generator.create_tile_from_data(mob_tile_data, mob_id)
 		
-		mob_obj = mobs.mob(id_=mob_id, name=mob_name, plural=mob_plural, description=mob_description, description_long=mob_description_long, health=mob_health, speed=mob_speed, sight_range=mob_sight_range, stamina=mob_stamina, hunger=mob_hunger, thirst=mob_thirst, mana=mob_mana, sense_range=mob_sense_range, determined=mob_determined, pathfinding=mob_pathfinding, hostile=mob_hostile, ethereal=mob_ethereal, tile=mob_tile, aura=mob_aura, emit=mob_emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20)
+		mob_obj = mobs.mob(id_=mob_id, name=mob_name, plural=mob_plural, description=mob_description, description_long=mob_description_long, health=mob_health, speed=mob_speed, carry_weight=mob_carry_weight, carry_volume=mob_carry_volume, sight_range=mob_sight_range, stamina=mob_stamina, hunger=mob_hunger, thirst=mob_thirst, mana=mob_mana, sense_range=mob_sense_range, determined=mob_determined, pathfinding=mob_pathfinding, hostile=mob_hostile, ethereal=mob_ethereal, tile=mob_tile, aura=mob_aura, emit=mob_emit, sight_border_requirement=500, detect_glow_str=100, detect_glow_range=20, actions=mob_actions)
 
 		return (mob_obj, mob_aura)
 
@@ -192,7 +197,7 @@ class action_generator(object):
 		try:
 			action_data = self.data[id_]
 		except KeyError:
-			action_data = self.data["walk"]
+			return False
 
 		action_type = action_data["type"]
 		action_name = action_data["name"] 
@@ -205,11 +210,11 @@ class action_generator(object):
 
 		if action_type == "movement":
 			action_range = action_data["range"]
-			action_obj = action.Movement_Action(cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, range=action_range)
+			action_obj = action.Movement_Action(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, range=action_range)
 
 		elif action_type == "melee attack":
 			action_damage = action_data["damage"]
-			action_obj = action.Melee_Attack(cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, damage=action_damage)
+			action_obj = action.Melee_Attack(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, damage=action_damage)
 
 		self.actions[id_] = action_obj
 		return action_obj
@@ -217,6 +222,7 @@ class action_generator(object):
 class item_generator(object):
 	def __init__(self, game):
 		self.game = game
+		self.items = {} # dictionary: { non-dynamic item id : item obj }
 
 	def re_path(self, path_to_item_data):
 		with open(path_to_item_data) as file:
@@ -226,4 +232,58 @@ class item_generator(object):
 		try:
 			item_data = self.data[id_]
 		except KeyError:
-			item_data = self.data["test_item"]
+			return False
+
+		# flags
+		item_flags = item_data["flags"]
+		item_dynamic = "DYNAMIC" in item_flags
+
+		if not item_dynamic:
+			if id_ in self.items:
+				return self.items[id_]
+
+		# create new instance of item plural, icon, color, description, description_long,  weight, volume
+		item_type = item_data["type"]
+
+		item_name = item_data["name"]
+		item_plural = item_data["plural"]
+		item_slot = item_data["slot"]
+		if item_slot == "None":
+			item_slot = None
+		item_icon = item_data["icon"]
+		item_color = item_data["color"]
+		item_description = item_data["description"]
+		try:
+			item_description_long = item_data["description long"]
+		except KeyError:
+			item_description_long = None
+		item_weight = item_data["weight"]
+		item_volume = item_data["volume"]
+
+		try:
+			item_buffs = item_data["buffs"]
+		except KeyError:
+			item_buffs = {}
+
+		try:
+			item_multipliers = item_data["multipliers"]
+		except KeyError:
+			item_multipliers = {}
+
+		if item_type == "standard":
+			item_obj = items.item(id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers)
+
+		elif item_type == "melee weapon":
+			item_base_damage = item_data["base damage"]
+			item_actions = item_data["actions"]
+
+			# convert action ids into objects
+			for i, action_id in enumerate(item_actions):
+				item_actions[i] = self.game.action_generator.get_action_from_id(action_id)
+
+			item_obj = items.item(id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers, base_damage=item_base_damage, actions=item_actions)
+
+		if not item_dynamic:
+			self.items[id_] = item_obj
+
+		return item_obj

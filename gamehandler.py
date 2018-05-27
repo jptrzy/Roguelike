@@ -136,9 +136,11 @@ class Game(object):
 		self.aura_generator = generators.aura_generator(self)
 		self.mob_generator = generators.mob_generator(self)
 		self.action_generator = generators.action_generator(self)
+		self.item_generator = generators.item_generator(self)
 		self.tile_generator.re_path("./data/tiles.json")
 		self.mob_generator.re_path("./data/mobs.json")
 		self.action_generator.re_path("./data/action.json")
+		self.item_generator.re_path("./data/items.json")
 
 		### generate new world
 		self.world = chunk.worldmap(self, 100, 100, 'World')
@@ -165,7 +167,7 @@ class Game(object):
 				break
 
 		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer_id='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
-		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, sight_range=30, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20)
+		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, carry_weight=100, carry_volume=100, sight_range=30, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20, actions=[self.action_generator.get_action_from_id(action_id) for action_id in ['walk', 'sprint', 'punch']])
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)

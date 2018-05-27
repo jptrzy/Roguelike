@@ -71,18 +71,31 @@ class wizard_commands(object):
 				game.world.layers.delete_tile(game.me.y+y, game.me.x+x, destroy_tile)
 				game.update_screen()
 
+		if request[0] == 'learn_action':
+			try:
+				new_action = game.action_generator.get_action_from_id(request[1])
+				if new_action:
+					game.me.actions.append(new_action)
+					game.message_panel.add_phrase("You learned "+str(new_action.name)+'!')
+					game.message_panel.print_messages()
+				else:
+					windows.pure_text_popup(("Action id not found.", [255,0,0]), game=game)
+			except IndexError:
+				pass
+
 		self.prev_request = request
 
 	def prompt_coordinates(self, game):
 		while True:
 			prompt_coordinates = windows.text_input_popup("Enter relative y and x coordinates (separate by space):", game=game, only_ascii=False)
-			coordinates = prompt_coordinates.init().split()
-
-			try:
-				y, x = int(coordinates[0]), int(coordinates[1])
-				break
-			except:
-				windows.pure_text_popup(("Please enter two valid numerical coordinates.", (255,0,0)),game=game)
+			coordinates = prompt_coordinates.init()
+			if coordinates is not None:
+				coordinates = coordinates.split()
+				try:
+					y, x = int(coordinates[0]), int(coordinates[1])
+					break
+				except:
+					windows.pure_text_popup(("Please enter two valid numerical coordinates.", (255,0,0)),game=game)
 
 		return y, x
 

@@ -7,16 +7,9 @@ from include import gradient
 import string
 import math
 
-class inv(object):
-	def __init__(self, space=100, items = []):
-		self.space = space
-		self.items = items
-
 class character(living):
-	def __init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina,hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement=500, detect_glow_str=100,detect_glow_range=20):
-		living.__init__(self, id_, name, plural, description, description_long, health, speed, sight_range, stamina, hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range)
-
-		self.inv = inv()
+	def __init__(self, id_, name, plural, description, description_long, health, speed, carry_weight, carry_volume, sight_range, stamina,hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range, actions):
+		living.__init__(self, id_, name, plural, description, description_long, health, speed, carry_weight, carry_volume,sight_range, stamina, hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range, actions)
 
 	def window_init(self, w_ylen, w_xlen, y, x):
 		self.window = windows.window(w_ylen, w_xlen, y, x)

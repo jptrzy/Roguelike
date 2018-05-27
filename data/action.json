@@ -41,5 +41,16 @@
 		"stamina_cost" : 10,
 		"damage" : 1000000000000000000000000000000000000000,
 		"flags" : []
+	},
+
+	"stab" : {
+		"type" : "melee attack",
+		"name" : "Stab",
+		"description" : "Lunge and stab a foe.",
+		"cast_time" : 0,
+		"recover_time" : 20,
+		"stamina_cost" : 10,
+		"damage" : 20,
+		"flags" : []
 	}
 }

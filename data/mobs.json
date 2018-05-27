@@ -13,6 +13,8 @@
 		
 		"health" : 100,
 		"speed" : 100,
+		"carry weight" : 100,
+		"carry volume" : 100,
 		"sight range" : 20,
 		"stamina" : 100,
 		"hunger" : 100,
@@ -20,6 +22,7 @@
 		"mana" : 100,
 		"sense range" : 10,
 		"determined" : 300,
+		"actions" : ["walk", "punch"],
 		"flags" : []
 	},
 
@@ -37,13 +40,15 @@
 
 		"aura" : {
 			"glow_color" : [249,173,34],
-			"glow_range" : 5,
-			"glow_strength" : 1000, 
+			"glow_range" : 15,
+			"glow_strength" : 500, 
 			"glow_color_strength" : 0.6
 		},
 
 		"health" : 100,
 		"speed" : 100,
+		"carry weight" : 100,
+		"carry volume" : 100,
 		"sight range" : 20,
 		"stamina" : 100,
 		"hunger" : 100,
@@ -51,6 +56,7 @@
 		"mana" : 100,
 		"sense range" : 10,
 		"determined" : 300,
+		"actions" : ["walk", "punch"],
 		"flags" : []
 	},
 
@@ -68,6 +74,8 @@
 		
 		"health" : 100,
 		"speed" : 200,
+		"carry weight" : 100,
+		"carry volume" : 100,
 		"sight range" : 20,
 		"stamina" : 100,
 		"hunger" : 100,
@@ -75,6 +83,7 @@
 		"mana" : 100,
 		"sense range" : 10,
 		"determined" : 300,
+		"actions" : ["walk", "punch"],
 		"flags" : []
 	},
 
@@ -92,6 +101,8 @@
 		
 		"health" : 100,
 		"speed" : 100,
+		"carry weight" : 100,
+		"carry volume" : 100,
 		"sight range" : 5,
 		"stamina" : 100,
 		"hunger" : 100,
@@ -99,6 +110,7 @@
 		"mana" : 100,
 		"sense range" : 5,
 		"determined" : 100,
+		"actions" : ["walk", "punch"],
 		"flags" : []
 	},
 
@@ -116,6 +128,8 @@
 		
 		"health" : 100,
 		"speed" : 100,
+		"carry weight" : 100,
+		"carry volume" : 100,
 		"sight range" : 100,
 		"stamina" : 100,
 		"hunger" : 100,
@@ -123,6 +137,7 @@
 		"mana" : 100,
 		"sense range" : 100,
 		"determined" : 10000,
+		"actions" : ["walk", "punch"],
 		"flags" : []
 	}
 }
