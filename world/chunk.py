@@ -183,7 +183,7 @@ class worldmap(object):
 		locy = character.y
 		locx = character.x
 
-		sight = character.sight_range.value
+		sight = character.sight_range
 
 		self.distance_map = bresenham.get_distance_map(locy, locx, sight)
 		self.visible_coords = self.game.FOV.Calculate_Sight(self.sight_blockable_coordinates, locy, locx, sight, self.distance_map)
