@@ -18,26 +18,26 @@ class stat(object):
 		# initially start at max
 		self.value = max_amt
 		self.raw_max = max_amt
+		self.max = max_amt
 		self.buffs = buffs
 		self.multipliers = multipliers
 
 		self.recalc_max()
 
 	def recalc_max(self):
-		self.value = self.raw_max
+		self.max = self.raw_max
 
-		for add in self.buffs:
-			self.value += add 
+		for buff in self.buffs:
+			self.max += buff 
 
 		for multiplier in self.multipliers:
-			self.value = self.raw_max * multiplier
+			self.max = self.max * multiplier
 
-		self.value = int(math.floor(self.value))
+		self.value = min(self.value, self.max)
 
 class dynamic_stat(stat):
 	def __init__(self, max_amt, color_info, regen_rate=0.1, buffs=[], multipliers=[]):
 		stat.__init__(self, max_amt, buffs, multipliers)
-		self.max = max_amt
 		self.color_info = color_info
 		self.regen_rate = regen_rate
 
