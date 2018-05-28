@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*- 
 
 class Action(object):
-	def __init__(self, id_, name, cast_time, recover_time, stamina_cost):
+	def __init__(self, id_, name, cast_time, recover_time, cost):
 		self.id_ = id_
 		self.name = name
 		self.cast_time = cast_time
 		self.recover_time = recover_time
-		self.stamina_cost = stamina_cost
+		self.cost = cost
 
 	def _calc_prep_time(self, speed):
 		return float(self.cast_time) / (float(speed) / 100)
@@ -19,23 +19,48 @@ class Action(object):
 		mob.current_action = self
 		mob.update_stage = 1
 
+	@staticmethod
+	def get_stat_lookup(mob, stat_id):
+		stat_ids = {
+			"stamina" : mob.stamina_stat,
+			"carry weight" : mob.carry_weight_stat,
+			"carry volume" : mob.carry_volume_stat,
+			"speed" : mob.speed_stat,
+			"sight range" : mob.sight_range_stat,
+			"sight border requirement" : mob.sight_border_requirement_stat,
+			"detect glow str" : mob.detect_glow_str_stat,
+			"detect glow range" : mob.detect_glow_range_stat,
+			"health" : mob.health_stat,
+			"mana" : mob.mana_stat,
+			"stamina" : mob.stamina_stat,
+			"hunger" : mob.hunger_stat,
+			"thirst" : mob.thirst_stat
+		}
+
+		return stat_ids[stat_id] 
+
 class Movement_Action(Action):
-	def __init__(self, id_, name, cast_time, recover_time, stamina_cost, range):
-		Action.__init__(self, id_, name, cast_time, recover_time, stamina_cost)
+	def __init__(self, id_, name, cast_time, recover_time, cost, range):
+		Action.__init__(self, id_, name, cast_time, recover_time, cost)
 		self.range = range
 
 	def do(self, game, mob, y, x):
-		successful = False
+		successful = True
 		return_message = None
 
-		if mob.stamina - self.stamina_cost > 0:
-			if mob.move_to_cord(y, x):
-				successful = True
-				mob.stamina_stat.alter(-self.stamina_cost)
-			else:
+		for stat_id in self.cost:
+			if self.get_stat_lookup(mob, stat_id).value - self.cost[stat_id] < 0:
+				return_message = "Not enough " + str(stat_id) + "!"
+				successful = False
+				break
+
+		if successful:
+			if not mob.move_to_cord(y, x):
+				successful = False
 				return_message = "Something blocked your path!"
-		else:
-			return_message = "Not enough stamina!"
+			else:
+				for stat_id in self.cost:
+					self.get_stat_lookup(mob, stat_id).alter(-self.cost[stat_id])
 		
 		mob.update_stage = 2
 
@@ -45,8 +70,8 @@ class Movement_Action(Action):
 		return successful, return_message
 
 class Melee_Attack(Action):
-	def __init__(self, id_, name, cast_time, recover_time, stamina_cost, damage):
-		Action.__init__(self, id_, name, cast_time, recover_time, stamina_cost)
+	def __init__(self, id_, name, cast_time, recover_time, cost, damage):
+		Action.__init__(self, id_, name, cast_time, recover_time, cost)
 		self.damage = damage
 
 	def do(self, game, mob, attack_y, attack_x, mob_dictionary):
@@ -57,7 +82,13 @@ class Melee_Attack(Action):
 			successful = False
 			return_message = "You lack the equipment or knowledge required to perform the attack!"
 		else:
-			if mob.stamina - self.stamina_cost > 0:
+			for stat_id in self.cost:
+				if self.get_stat_lookup(mob, stat_id).value - self.cost[stat_id] < 0:
+					return_message = "Not enough " + str(stat_id) + "!"
+					successful = False
+					break
+
+			if successful:
 				try:
 					attack_this_mob = mob_dictionary[(attack_y, attack_x)]
 					attack_this_mob.health_stat.alter(-self.damage)
@@ -68,11 +99,9 @@ class Melee_Attack(Action):
 					successful = False
 					return_message = "You don't hit anything!"
 
-				mob.stamina_stat.alter(-self.stamina_cost)
 
-			else:
-				successful = False
-				return_message = "Not enough stamina!"
+				for stat_id in self.cost:
+					self.get_stat_lookup(mob, stat_id).alter(-self.cost[stat_id])
 
 		mob.update_stage = 2
 

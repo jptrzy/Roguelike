@@ -204,17 +204,17 @@ class action_generator(object):
 		action_description = action_data["description"]
 		action_cast_time = action_data["cast_time"] 
 		action_recover_time = action_data["recover_time"]
-		action_stamina_cost = action_data["stamina_cost"]
+		action_cost = action_data["cost"]
 
 		action_flags = action_data["flags"]
 
 		if action_type == "movement":
 			action_range = action_data["range"]
-			action_obj = action.Movement_Action(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, range=action_range)
+			action_obj = action.Movement_Action(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, cost=action_cost, range=action_range)
 
 		elif action_type == "melee attack":
 			action_damage = action_data["damage"]
-			action_obj = action.Melee_Attack(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, stamina_cost=action_stamina_cost, damage=action_damage)
+			action_obj = action.Melee_Attack(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, cost=action_cost, damage=action_damage)
 
 		self.actions[id_] = action_obj
 		return action_obj
@@ -281,7 +281,7 @@ class item_generator(object):
 			for i, action_id in enumerate(item_actions):
 				item_actions[i] = self.game.action_generator.get_action_from_id(action_id)
 
-			item_obj = items.item(id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers, base_damage=item_base_damage, actions=item_actions)
+			item_obj = items.melee_weapon(id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers, base_damage=item_base_damage, actions=item_actions)
 
 		if not item_dynamic:
 			self.items[id_] = item_obj

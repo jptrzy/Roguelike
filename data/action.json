@@ -5,7 +5,9 @@
 		"description" : "Take one step.",
 		"cast_time" : 0.1,
 		"recover_time" : 1,
-		"stamina_cost" : 0.1,
+		"cost" : {
+			"stamina" : 0.1
+		},
 		"range" : 1,
 		"flags" : []
 	},
@@ -16,7 +18,9 @@
 		"description" : "Sprint across one step.",
 		"cast_time" : 0.05,
 		"recover_time" : 0.5,
-		"stamina_cost" : 20,
+		"cost" : {
+			"stamina" : 20
+		},
 		"range" : 1,
 		"flags" : []
 	},
@@ -27,7 +31,9 @@
 		"description" : "Throw a weak punch.",
 		"cast_time" : 0.1,
 		"recover_time" : 2,
-		"stamina_cost" : 10,
+		"cost" : {
+			"stamina" : 10
+		},
 		"damage" : 5,
 		"flags" : []
 	},
@@ -38,7 +44,9 @@
 		"description" : "Obliterate a foe. Used for debugging.",
 		"cast_time" : 0,
 		"recover_time" : 0,
-		"stamina_cost" : 10,
+		"cost" : {
+			"stamina" : 10
+		},
 		"damage" : 1000000000000000000000000000000000000000,
 		"flags" : []
 	},
@@ -49,7 +57,9 @@
 		"description" : "Lunge and stab a foe.",
 		"cast_time" : 0,
 		"recover_time" : 20,
-		"stamina_cost" : 10,
+		"cost" : {
+			"stamina" : 10
+		},
 		"damage" : 20,
 		"flags" : []
 	}
