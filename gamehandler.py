@@ -19,6 +19,7 @@ from animation import *
 from window import infopanel
 from window import windows
 import generators
+import items
 
 
 class Game(object):
@@ -168,6 +169,7 @@ class Game(object):
 
 		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer_id='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
 		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, carry_weight=100, carry_volume=100, sight_range=30, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20, actions=[self.action_generator.get_action_from_id(action_id) for action_id in ['walk', 'sprint', 'punch']])
+		self.inventory_window = items.inventory_window(self.me.inventory, self)
 
 		self.me.mapy = self.world.get_mapy(5000)
 		self.me.mapx = self.world.get_mapx(5000)
