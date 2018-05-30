@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 import UserString
+import re
 
 # Converts a string into a list of word-color pairs
 # - if no color is specified, will auto pick white
@@ -7,7 +8,7 @@ def convert_phrase_to_list(phrase, color=[255,255,255]):
 	if len(phrase.split()) == 1:
 		return [[phrase, color]]
 
-	phrase_list = [e+' ' for e in phrase.split() if e]
+	phrase_list = [e+' ' for e in re.split("(?<!\\s) ", phrase) if e]
 	phrase_list[-1] = UserString.MutableString(phrase_list[-1])
 
 	del phrase_list[-1][-1]
