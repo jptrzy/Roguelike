@@ -12,6 +12,7 @@ import action
 from window import windows
 import json
 import items
+from inventory import inventory
 
 class stat(object):
 	def __init__(self, max_amt, buffs=[], multipliers=[]):
@@ -106,7 +107,7 @@ class living(object):
 					dynam_stat.color_info[n][i] = int(0.7*dynam_stat.color_info[n][i])
 
 		# inventory
-		self.inventory = items.inventory(self)
+		self.inventory = inventory.inventory(self)
 
 		# actions
 		self.actions = actions

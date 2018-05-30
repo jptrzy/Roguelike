@@ -99,7 +99,7 @@ class wizard_commands(object):
 			print game.me.inventory.items
 
 		if request[0] == "i":
-			game.inventory_window.init()
+			game.inventorywindow.init()
 
 		self.prev_request = request
 
