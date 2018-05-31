@@ -19,6 +19,7 @@ class inventorywindow(windows.popup):
 				╚════════════════════════════════════════════════════════════════════════════════════╝
 		"""		
 		self.inventory = inventory
+		self.game = game
 
 		self.game_y_len = game.preferences.w_ylen
 		self.game_x_len = game.preferences.w_xlen
@@ -26,7 +27,7 @@ class inventorywindow(windows.popup):
 		self.selection_column = "items" # "items" or "equipped"
 
 		self.row_width = 30
-		self.max_rows = 7
+		self.max_rows = 30
 
 		self.items_large_window = False
 		self.equipped_items_large_window = False
@@ -47,6 +48,56 @@ class inventorywindow(windows.popup):
 			self.end_row = 0
 
 	def init(self):
+		self.run_inventory = True
+		while self.run_inventory:
+			self.process_input(self.open_instance())
+
+		# finished with inventory
+		self.close()
+		terminal.refresh()
+
+	def process_input(self, item_option):
+		if item_option is None:
+			return
+
+		# display information about the item
+		title = item_option.string
+
+		info = [(item_option.item.description, (200,200,200))]
+		if item_option.item.description_long is not None:
+			info.append((item_option.item.description_long, (200,200,200)))
+
+		try:
+			if len(item_option.item.actions) > 0:
+				info.append(("\\n", (0,0,0)))
+				info.append((("Equipping will allow you to perform the following actions: \\n"), (255,255,255)))
+				if len(item_option.item.actions) == 1:
+					info.append((item_option.item.actions[0].name, (200,200,200)))
+				else:
+					for action_index in range(len(item_option.item.actions)):
+						if action_index < len(item_option.item.actions) - 1:
+							info.append((action.name+",", (200,200,200)))
+						else:
+							info.append((action.name, (200,200,200)))
+		except AttributeError:
+			pass
+
+		item_info = windows.pure_text_popup(info, game=self.game, title=title, exit=item_option.item.keybinds)
+
+		# print keybinds for modifying the item
+		keybind_info = []
+		for keybind in item_option.item.keybinds:
+			keybind_info.append((keybind, (255,255,255)))
+			keybind_info.append((item_option.item.keybinds[keybind] + ' \\n', (200,200,200)))
+
+		keybind_info_window = windows.text_popup_no_input(keybind_info, game=self.game, window_y=item_info.window.y, window_x=item_info.window.x+item_info.window.xlen)
+
+		# get input from player
+		input_ = item_info.init()
+
+
+
+	def open_instance(self):
 		self.item_option_index = 0
 		self.equipped_option_index = 0
 
@@ -63,8 +114,6 @@ class inventorywindow(windows.popup):
 				self.get_next_char()
 
 		# finished response
-		self.close()
-		terminal.refresh()
 
 		if self.item_option_index is None or self.equipped_option_index is None:
 			return None
@@ -77,6 +126,9 @@ class inventorywindow(windows.popup):
 				if self.no_equipped_items:
 					return None
 				return self.equipped_items_options[self.equipped_option_index]
+
+		# close this instance of the window
+		self.close()
 
 	def get_next_char(self):
 		char = terminal.read()
@@ -102,9 +154,11 @@ class inventorywindow(windows.popup):
 						self.recalc_min_max_rows()
 		elif char in [terminal.TK_TAB, terminal.TK_LEFT, terminal.TK_RIGHT]:
 			if self.selection_column == "items":
-				self.selection_column = "equipped"
+				if not self.no_equipped_items:
+					self.selection_column = "equipped"
 			else:
-				self.selection_column = "items"
+				if not self.no_items:
+					self.selection_column = "items"
 
 		elif char == terminal.TK_ENTER:
 			self.proceed = False
@@ -114,6 +168,7 @@ class inventorywindow(windows.popup):
 			self.item_option_index = None
 			self.equipped_option_index  = None
 			self.proceed = False
+			self.run_inventory = False
 			return
 
 		self.refresh_window()
@@ -180,7 +235,7 @@ class inventorywindow(windows.popup):
 				current_item_type = option.item.type
 
 			option.start_row = self.item_row_length
-			message.s_add_message(message.convert_phrase_to_list(option.string), self.row_width, self.add_new_item_row)
+			message.s_add_message(message.convert_phrase_to_list(option.string, color=(200,200,200)), self.row_width, self.add_new_item_row)
 			option.end_row = self.item_row_length - 1
 
 		self.no_items = (len(self.item_options) == 0)
