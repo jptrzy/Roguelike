@@ -16,7 +16,7 @@ My YouTube channel where I sometimes showcase features of the game: https://www.
 * Dynamic lighting, Day/Night cycles, Obstruction lighting, Ambient lighting
 * Windows overhaul, including: panels, pop-ups, scroll bar, text wrapping, escape characters
 * Time-based action system (actions take time to prepare, execute, and recover)
-* Save/Load game saves using Python's shelve module
+* Save/Load game saves using gzip and cPickle
 
 ## Currently working on:
 
