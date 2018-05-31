@@ -35,7 +35,8 @@ class wizard_commands(object):
 				game.message_panel.add_phrase('Time advanced by ' + str(time_advance))
 				game.message_panel.print_messages()	
 			except IndexError:
-				windows.pure_text_popup(("Please enter a time increment.", (255,0,0)), game=game)
+				error_message = windows.pure_text_popup(("Please enter a time increment.", (255,0,0)), game=game)
+				error_message.init()
 
 		if request[0] == 'spawn':
 			mob_id, y, x = self.create_obj(game, request, game.mob_generator)
@@ -55,7 +56,8 @@ class wizard_commands(object):
 			destructable_tiles = game.world.layers.get_destructable_tiles(game.me.y+y, game.me.x+x)
 
 			if len(destructable_tiles) == 0:
-				windows.pure_text_popup(("No destructable tiles found.", [255,0,0]), game=game)
+				error_message = windows.pure_text_popup(("No destructable tiles found.", [255,0,0]), game=game)
+				error_message.init()
 			else:
 				options = []
 
@@ -79,7 +81,8 @@ class wizard_commands(object):
 					game.message_panel.add_phrase("You learned "+str(new_action.name)+'!')
 					game.message_panel.print_messages()
 				else:
-					windows.pure_text_popup(("Action id not found.", [255,0,0]), game=game)
+					error_message = windows.pure_text_popup(("Action id not found.", [255,0,0]), game=game)
+					error_message.init()
 			except IndexError:
 				pass
 
@@ -113,7 +116,8 @@ class wizard_commands(object):
 					y, x = int(coordinates[0]), int(coordinates[1])
 					break
 				except:
-					windows.pure_text_popup(("Please enter two valid numerical coordinates.", (255,0,0)),game=game)
+					error_message = windows.pure_text_popup(("Please enter two valid numerical coordinates.", (255,0,0)),game=game)
+					error_message.init()
 
 		return y, x
 

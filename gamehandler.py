@@ -66,7 +66,8 @@ class Game(object):
 	def game_over(self):
 		self.die = True
 		self.proceed = False
-		windows.pure_text_popup("Rest in peace.", game=self)
+		rip_window = windows.pure_text_popup("Rest in peace.", game=self)
+		rip_window.init()
 
 	def close(self):
 		pass

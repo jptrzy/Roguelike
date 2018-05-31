@@ -116,7 +116,8 @@ class main_menu(object):
 			elif self.choices[self.choice] == load_game_option:
 				num_loads = len(saves)
 				if num_loads == 0:
-					windows.pure_text_popup(["Error: No file exists.", [255,0,0]], activepopups=self.active_popups,w_ylen=preferences.w_ylen, w_xlen=preferences.w_xlen)
+					no_file_error = windows.pure_text_popup(["Error: No file exists.", [255,0,0]], activepopups=self.active_popups,w_ylen=preferences.w_ylen, w_xlen=preferences.w_xlen)
+					no_file_error.init()
 				else:
 					load_file_name_prompt = windows.scroll_selection_popup("Select save file:", saves, activepopups=self.active_popups,w_ylen=preferences.w_ylen, w_xlen=preferences.w_xlen)
 					load_file_name = load_file_name_prompt.init()

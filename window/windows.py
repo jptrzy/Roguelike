@@ -251,7 +251,7 @@ class popup(object): # this class only handles display!
 		self.activepopups -= 1
 
 class text_popup(popup):
-	def __init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, bottom_blank_rows=0):
+	def __init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows):
 		if game is None:
 			self.game_y_len = w_ylen
 			self.game_x_len = w_xlen
@@ -264,6 +264,13 @@ class text_popup(popup):
 		self.body_message = body_message
 		self.title = title
 		self.bottom_blank_rows = bottom_blank_rows
+
+		# if window_y and window_x are None (not specified), will automatically put popup in middle of screen
+		self.window_y = window_y
+		self.window_x = window_x
+
+		self.row_width = row_width
+		self.max_rows = max_rows
 
 		'''
 		small window:
@@ -295,8 +302,6 @@ class text_popup(popup):
 		self.title_row_list = []
 		self.body_row_length = 0
 		self.title_row_length = 0
-		self.row_width = 30
-		self.max_rows = 21
 		self.large_window = False
 
 	def standard_initiate_window(self):
@@ -306,33 +311,34 @@ class text_popup(popup):
 			s_add_message(convert_phrase_to_list(self.title), self.row_width, self.add_new_title_row)
 
 		try:
-			self.body_message[1][1][1]
+			self.body_message[0][1][1] # [('phrase', color), ... ]
 			s_add_message(custom_convert_phrase_to_list(self.body_message), self.row_width, self.add_new_body_row)
 			# multiple colors
 		except:
 			# only one color
 			try:
-				self.body_message[1][1]
+				self.body_message[1][1] # ('phrase' , color)
 				s_add_message(convert_phrase_to_list(self.body_message[0], self.body_message[1]), self.row_width, self.add_new_body_row)
 			except IndexError:
-				s_add_message(convert_phrase_to_list(self.body_message, [200,200,200]), self.row_width, self.add_new_body_row)
+				s_add_message(convert_phrase_to_list(self.body_message, (200,200,200)), self.row_width, self.add_new_body_row)
 
 		self.prepare_window()
 
 
 	def prepare_window(self):
-		if self.body_row_length == 1:
-			if self.title == None:
-				self.row_width = len(self.body_row_list[0])
-			else:
-				self.row_width = max(len(self.body_row_list[0]), len(self.title))
+		self.row_width = len(max(self.body_row_list+self.title_row_list, key=len))
 
 		self.body_row_display_length = min(self.body_row_length, self.max_rows-self.title_row_length)
 
 		self.min_row = 0
 		self.max_row = self.body_row_display_length - 1
 
-		popup.__init__(self, self.body_row_display_length+2+self.title_row_length+self.bottom_blank_rows, self.row_width+2, self.game_y_len/2-(self.body_row_display_length+self.title_row_length+self.bottom_blank_rows+2)/2, self.game_x_len/2-(self.row_width+2)/2, self.activepopups)
+		if self.window_y is None:
+			self.window_y = self.game_y_len/2-(self.body_row_display_length+self.title_row_length+self.bottom_blank_rows+2)/2
+		if self.window_x is None:
+			self.window_x = self.game_x_len/2-(self.row_width+2)/2
+
+		popup.__init__(self, self.body_row_display_length+2+self.title_row_length+self.bottom_blank_rows, self.row_width+2, self.window_y, self.window_x, self.activepopups)
 
 	def add_new_body_row(self, row):
 		self.body_row_list.append(row)
@@ -401,8 +407,8 @@ class text_popup(popup):
 		self.activepopups -= 1
 
 class scroll_selection_popup(text_popup):
-	def __init__(self, title_message, selection_options, game=None, activepopups=0, w_ylen=0, w_xlen=0):
-		text_popup.__init__(self, '', game, activepopups, title_message, w_ylen, w_xlen, bottom_blank_rows=0)
+	def __init__(self, title_message, selection_options, game=None, activepopups=0, w_ylen=0, w_xlen=0, window_y=None, window_x=None, row_width=30, max_rows=21):
+		text_popup.__init__(self, '', game, activepopups, title_message, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows=0)
 		"""
 				╔═══════════════════════════════════════════════╗
 				║TITLE MESSAGE (ex. PICK ONE: )                 ║
@@ -519,8 +525,8 @@ class scroll_selection_popup(text_popup):
 
 
 class yes_or_no_popup(text_popup):
-	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0):
-		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, bottom_blank_rows=0)
+	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0, window_y=None, window_x=None, row_width=30, max_rows=21):
+		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows=0)
 		self.standard_initiate_window()
 
 	def get_next_char(self):
@@ -567,11 +573,10 @@ class yes_or_no_popup(text_popup):
 		return self.reply
 
 class pure_text_popup(text_popup):
-	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0, exit='any'):
-		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen)
+	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0, exit='any', window_y=None, window_x=None, row_width=30, max_rows=21): # exit: 'any', 'escape', or a list of terminal keys
+		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows=0)
 		self.exit = exit
 		self.standard_initiate_window()
-		self.init()
 
 	def init(self):
 		self.window_init()
@@ -579,6 +584,7 @@ class pure_text_popup(text_popup):
 		terminal.refresh()
 
 		self.proceed = True
+		self.return_reply = None
 
 		while self.proceed:
 			while terminal.has_input() and self.proceed:
@@ -586,6 +592,8 @@ class pure_text_popup(text_popup):
 
 		self.close()
 		terminal.refresh()
+
+		return self.return_reply
 
 	def get_next_char(self):
 		char = terminal.read()
@@ -600,22 +608,36 @@ class pure_text_popup(text_popup):
 						self.min_row -= 1
 						self.max_row -= 1
 		else:
-			if self.exit == 'any':
-				self.proceed = False		
 			if char == terminal.TK_ESCAPE:
 				self.proceed = False
 				return
-			elif char == terminal.TK_ENTER:
+			if char == terminal.TK_ENTER:
 				self.proceed = False
 				return
+			if self.exit == 'any':
+				self.proceed = False
+			else:
+				if self.exit is not None:
+					char = terminal.state(terminal.TK_CHAR)
+					char = str(unichr(char))
+					if char in self.exit:
+						self.proceed = False
+						self.return_char = char	
 
 		self.refresh_window()
 		terminal.refresh()
 
+class text_popup_no_input(text_popup):
+	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0, window_y=None, window_x=None, row_width=30, max_rows=21):
+		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows=0)
+		self.standard_initiate_window()
+		self.window_init()
+		self.refresh_window()
+		terminal.refresh()
 
 class text_input_popup(text_popup):
-	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0, only_ascii=True):
-		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, bottom_blank_rows=1)
+	def __init__(self, body_message, game=None, activepopups=0, title=None, w_ylen=0, w_xlen=0, only_ascii=True, window_y=None, window_x=None, row_width=30, max_rows=21):
+		text_popup.__init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows=1)
 		self.standard_initiate_window()
 		self.only_ascii = only_ascii
 

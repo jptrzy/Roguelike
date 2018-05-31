@@ -197,7 +197,8 @@ class info_panel(object):
 
 				print_message.append(("\\n", (255,255,255)))
 
-		pure_text_popup(print_message, game=self.game, title="Enter/Esc to close.", exit='escape')
+		expanded_tile_info = pure_text_popup(print_message, game=self.game, title="Enter/Esc to close.", exit=None)
+		expanded_tile_info.init()
 
 
 	def _print(self):
