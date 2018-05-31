@@ -27,16 +27,16 @@ class info_panel(object):
 		distance = "%.2f" % math.hypot(self.game.me.y - self.check_y, self.game.me.x - self.check_x)
 		s_add_message(convert_phrase_to_list('Distance: ' + str(distance)), self.window.xlen, self.add_new_title_row)
 		if self.display_type == 'manual':
-			visible = False
+			self.visible = False
 			if (self.check_y, self.check_x) in self.game.world.visible_coords:
 				self.reset_print_info()
 				distance_from_player = self.game.world.distance_map[(self.check_y, self.check_x)]
 				if self.game.world.check_enough_light((self.check_y, self.check_x), distance_from_player, self.game.me):
 					# print info
 					self.prepare_tile_info()
-					visible = True
+					self.visible = True
 
-			if not visible:
+			if not self.visible:
 				s_add_message(convert_phrase_to_list('You cannot see this place.', [150,150,150]), self.window.xlen-1, self.add_new_row)
 		else:
 			if len(self.game.all_mobs.visible_mobs) > 0:
@@ -62,6 +62,7 @@ class info_panel(object):
 		if self.display_type == 'auto':
 			if len(self.game.all_mobs.visible_mobs) > 0:
 				current_mob = self.game.all_mobs.visible_mobs[self.view_index]
+				self.visible = True
 				self.check_y = current_mob.y
 				self.check_x = current_mob.x
 				self.check_mob = current_mob
@@ -125,7 +126,8 @@ class info_panel(object):
 				self._print()
 
 		elif self.dir == terminal.TK_X:
-			self.print_expanded_tile_info()
+			if self.visible:
+				self.print_expanded_tile_info()
 
 
 		elif self.dir == terminal.TK_ESCAPE:
@@ -163,7 +165,7 @@ class info_panel(object):
 
 	def prepare_mob_info(self, mob):
 		# set up print
-		health_bar_color = mob.health.get_stat_bar(self.window.xlen-1)
+		health_bar_color = mob.health_stat.get_stat_bar(self.window.xlen-1)
 		health_bar = []
 		for i in range(len(health_bar_color)):
 			health_bar.append([u'█', health_bar_color[i]])
