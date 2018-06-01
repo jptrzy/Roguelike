@@ -1,5 +1,5 @@
 {
-	"order" : ["terrain", "test_multi_layer", "constructs", "mobs"],
+	"order" : ["terrain", "test_multi_layer", "constructs", "mobs", "items"],
 
 	"terrain" : {
 		"name" : "terrain",
@@ -23,5 +23,11 @@
 		"name" : "mobs",
 		"max objects" : 1,
 		"destructable" : false
+	},
+
+	"items" : {
+		"name" : "items",
+		"max objects" : 10,
+		"destructable" : true
 	}
 }

@@ -73,7 +73,6 @@ class tile(object):
 			except KeyError:
 				pass
 
-
 class aura(object):
 	def __init__(self, glow_color, glow_range, glow_str, glow_color_str):
 		self.glow_color = glow_color

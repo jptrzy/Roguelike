@@ -168,7 +168,8 @@ class Game(object):
 			if player_name is not None:
 				break
 
-		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer_id='mobs', blocks_sight=False, blocks_path=True, ethereal=False)
+		player_tile = tiles.tile(id_='player',name=player_name, plural=player_name, icon='@', description='This is you.', description_long=None, color=[200,200,200], world_layer_id='mobs', blocks_sight=False, blocks_path=False, ethereal=False)
+		player_tile.worldlayer = self.world.layers.worldlayers['mobs']
 		self.me = character.character(id_='player',name=player_name, plural='Players', description='This is you.', description_long='This is you', health=100, speed=100, carry_weight=100, carry_volume=100, sight_range=30, stamina=100, hunger=100, thirst=100, mana=100, ethereal=False, tile=player_tile, aura=None, emit=False, sight_border_requirement=500, detect_glow_str=50, detect_glow_range=20, actions=[self.action_generator.get_action_from_id(action_id) for action_id in ['walk', 'sprint', 'punch']])
 		self.inventorywindow = inventorywindow.inventorywindow(self.me.inventory, self)
 

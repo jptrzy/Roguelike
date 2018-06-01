@@ -62,6 +62,8 @@ class tile_generator(object):
 
 		tile_obj = tiles.tile(id_=tile_id, name=tile_name, plural=tile_plural, icon=tile_icon, description=tile_description, description_long=tile_description_long, color=tile_color, world_layer_id=tile_world_layer_id, blocks_sight=tile_blocks_sight, blocks_path=tile_blocks_path, ethereal=tile_ethereal, aura=None, debris_data=debris_data)
 
+		tile_obj.worldlayer = self.game.world.layers.worldlayers[tile_obj.world_layer_id]
+
 		if not tile_dynamic:
 			self.tiles[tile_id] = tile_obj
 
@@ -91,7 +93,9 @@ class tile_generator(object):
 		tile_obj, tile_aura = self.create_tile_from_id(tile_id)
 
 		# attempt to add tile
-		successful = self.game.world.layers.add_tile(y, x, tile_obj)
+		successful = self.game.world.layers.check_add_tile_conditions(y, x, tile_obj)
+		if successful:
+			self.game.world.layers.add_tile(y, x, tile_obj)
 
 		# if successful, add aura if tile has one
 		if successful:
@@ -101,6 +105,20 @@ class tile_generator(object):
 				tile_aura._spawn(y, x)
 
 		return successful
+
+	def create_item_drop_tile(self, item, y, x):
+		tile_data = {}
+
+		tile_data["name"] = item.name
+		tile_data["plural"] = item.plural
+		tile_data["icon"] = item.icon
+		tile_data["description"] = item.description
+		tile_data["description long"] = item.description_long
+		tile_data["color"] = item.color
+		tile_data["world layer id"] = "items"
+		tile_data["flags"] = []
+
+		return self.create_tile_from_data(tile_data, item.id_)
 
 class mob_generator(object):
 	def __init__(self, game):
@@ -156,7 +174,8 @@ class mob_generator(object):
 		mob_tile_data["world layer id"] = "mobs"
 
 		if not mob_ethereal:
-			mob_tile_data["flags"].append("BLOCKS_PATH")
+			pass
+			#mob_tile_data["flags"].append("BLOCKS_PATH")
 
 		mob_tile_data["flags"].append("DYNAMIC")
 
@@ -271,7 +290,7 @@ class item_generator(object):
 			item_multipliers = {}
 
 		if item_type == "standard":
-			item_obj = items.item(type=item_type, id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers)
+			item_obj = items.item(type=item_type, id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_icon, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers)
 
 		elif item_type == "melee weapon":
 			item_base_damage = item_data["base damage"]
@@ -283,7 +302,7 @@ class item_generator(object):
 			for action_id in item_actions_ids:
 				item_actions.append(self.game.action_generator.get_action_from_id(action_id))
 
-			item_obj = items.melee_weapon(type=item_type, id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers, base_damage=item_base_damage, actions=item_actions)
+			item_obj = items.melee_weapon(type=item_type, id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_icon, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers, base_damage=item_base_damage, actions=item_actions)
 
 		if not item_dynamic:
 			self.items[id_] = item_obj

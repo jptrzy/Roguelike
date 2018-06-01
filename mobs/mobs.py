@@ -188,7 +188,7 @@ class living(object):
 		self.worldmap.layers.delete_tile(self.y, self.x, self.tile)
 		del self.group.mob_lib[(self.y, self.x)]
 
-	def add(self, y, x):
+	def add(self, y, x):   # MUST CHECK IF COORDINATES ARE OCCUPIED/BLOCKABLE BEFORE CALLING!
 		self.y = y
 		self.x = x
 

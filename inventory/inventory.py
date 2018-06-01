@@ -50,18 +50,34 @@ class inventory(object):
 
 		return successful, message
 
-	def del_item(self, item):
+	def check_del_item_conditions(self, item):
 		successful = True
 		message = None
-
 		try:
-			self.items[item] -= 1
-			if self.items[item] < 1:
-				del self.items[item]
-
+			self.items[item]
 		except KeyError:
 			message = "Item not found!"
 			successful = False
+
+		return successful, message
+
+	def del_item(self, item):
+		self.items[item] -= 1
+		if self.items[item] < 1:
+			del self.items[item]
+
+	def drop_item(self, item, y, x, game):
+		# deletes the item from inventory and drops it onto the world
+		successful, message = self.check_del_item_conditions(item)
+
+		if successful:
+			tile = game.tile_generator.create_item_drop_tile(item, y, x)
+			if not game.world.layers.check_add_tile_conditions(y, x, tile):
+				successful = False
+				message = "There's not enough space to drop the item!"
+			else:
+				self.del_item(item)
+				game.world.layers.add_tile(y, x, tile)
 
 		return successful, message
 

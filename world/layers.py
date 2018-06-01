@@ -6,6 +6,8 @@ World layers (from lowest to highest):
 - terrain
 - constructs
 - mobs
+
+- items
 """
 
 class worldlayer(object):
@@ -19,19 +21,20 @@ class worldlayer(object):
 		self.tiles = {} # dictionary: { (y, x) : number of objects }
 		self.layer_group = self.worldmap.layers
 
-	def add_tile(self, y, x): # checks if the tile is occupied DOES NOT CHECK IF BLOCKABLE
+	def check_add_tile_conditions(self, y, x):
 		try:
 			if self.tiles[(y, x)] + 1 > self.max_objects:
-				successful = False
+				return False
 			else:
-				self.tiles[(y, x)] += 1
-				successful = True
-
+				return True
 		except KeyError:
-			self.tiles[(y, x)]  = 1
-			successful = True
+			return True
 
-		return successful
+	def add_tile(self, y, x): # MUST CHECK WITH check_add_tile_conditions() BEFORE CALLING!
+		try:
+			self.tiles[(y, x)] += 1
+		except KeyError:
+			self.tiles[(y, x)] = 1
 
 	def delete_tile(self, y, x):
 		try:
@@ -81,27 +84,24 @@ class layer_tracker(object):
 		self.windows.del_win("top")
 		self.windows.add_win(self.worldlayers_count+1, "top")
 
-	def add_tile(self, y, x, tile):
-		tile.worldlayer = self.worldlayers[tile.world_layer_id]
-		if not tile.worldlayer.add_tile(y, x):
-			successful = False
+	def check_add_tile_conditions(self, y, x, tile):
+		if not tile.worldlayer.check_add_tile_conditions(y, x):
+			return False
 		else:
 			# worldlayer able to store object, now check other conditions
 			if (not tile.ethereal) and (not self.worldmap.check_passable(y, x)):
-				successful = False
-			else:
-				# tile able to be placed
-				try:
-					self.tiles[(y, x)].append(tile)
-				except KeyError:
-					self.tiles[(y, x)] = [tile]
+				return False
 
-				successful = True
+		return True
 
-		if successful:
-			self.recalculate_space(y, x)
+	def add_tile(self, y, x, tile): # MUST CHECK WITH check_add_tile_conditions() BEFORE CALLING!
+		tile.worldlayer.add_tile(y, x)
+		try:
+			self.tiles[(y, x)].append(tile)
+		except KeyError:
+			self.tiles[(y, x)] = [tile]
 
-		return successful
+		self.recalculate_space(y, x)
 
 	def delete_tile(self, y, x, tile):
 		try:

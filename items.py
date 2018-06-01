@@ -35,13 +35,13 @@ class item(object):
 
 		return self.keybinds
 
-	def process_modification(self, prompt_char, inventory):
+	def process_modification(self, prompt_char, inventory, game):
 		successful = True
 		message = None
 
 		if prompt_char == 'd':
 			if self.slot is None or inventory.equipped_items[self.slot] != self:
-				inventory.del_item(self)
+				successful, message = inventory.drop_item(self, game.me.y, game.me.x, game)
 			else:
 				successful = False
 				message = "You must unequip the item before dropping it!"
@@ -62,7 +62,7 @@ class melee_weapon(item):
 		self.base_damage = base_damage
 		self.actions = actions
 
-	def process_modification(self, prompt_char, inventory):
-		successful, message = super(melee_weapon, self).process_modification(prompt_char, inventory)
+	def process_modification(self, prompt_char, inventory, game):
+		successful, message = super(melee_weapon, self).process_modification(prompt_char, inventory, game)
 
 		return successful, message

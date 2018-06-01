@@ -97,7 +97,7 @@ class inventorywindow(windows.popup):
 		# get input from player
 		input_ = item_info.init()
 		if input_ is not None:
-			successful, message = item_option.item.process_modification(input_, self.inventory)
+			successful, message = item_option.item.process_modification(input_, self.inventory, self.game)
 
 		keybind_info_window.close()
 
