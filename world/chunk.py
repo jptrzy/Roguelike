@@ -339,13 +339,7 @@ class worldmap(object):
 				pass # add additional stuff here later
 
 	def check_passable(self, y, x):
-		try:
-			for tile in self.layers.tiles[(y, x)]:
-				if tile.blocks_path:
-					return False
-		except KeyError:
-			pass
-		return True
+		return (y, x) not in self.path_blockable_coordinates
 
 	def newchunk(self, distance):
 		parameters = {1:tiles.d1,2:tiles.d2,3:tiles.d3,4:tiles.d4,5:tiles.d5,6:tiles.d6,7:tiles.d7,8:tiles.d8,9:tiles.d9,10:tiles.d10}
