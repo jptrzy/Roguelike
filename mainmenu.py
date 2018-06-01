@@ -53,7 +53,7 @@ class main_menu(object):
 		title_window = windows.window(1, len(title), preferences.w_ylen/4, preferences.w_xlen/2-len(title)/2)
 		title_window.wprint(0, 0, title)
 
-		self.active_popups = 0 # keeps track of popup layers so they don't interfere
+		self.active_popups = windows.activepopups_handler() # keeps track of popup layers so they don't interfere
 
 		new_game_option = choice('New Game', int(float(preferences.w_ylen)/3*2), 0, layer=199)
 		load_game_option = choice('Load Game', int(float(preferences.w_ylen)/3*2), 0, layer=199)

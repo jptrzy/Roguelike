@@ -22,7 +22,6 @@ import generators
 import items
 from inventory import inventorywindow
 
-
 class Game(object):
 	def __init__(self):
 		pass
@@ -123,7 +122,7 @@ class Game(object):
 		self.left_panel.add_win(self.me.window)
 		self.right_panel.add_win(self.all_mobs.window)
 
-		self.activepopups = 0
+		self.activepopups.count = 0
 
 		return self.mainloop()
 
@@ -131,7 +130,7 @@ class Game(object):
 		terminal.clear()
 		terminal.refresh()
 
-		self.activepopups = 0
+		self.activepopups = windows.activepopups_handler()
 		self.preferences = preferences
 
 		# initialize object generators

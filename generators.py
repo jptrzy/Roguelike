@@ -275,11 +275,13 @@ class item_generator(object):
 
 		elif item_type == "melee weapon":
 			item_base_damage = item_data["base damage"]
-			item_actions = item_data["actions"]
+			item_actions_ids = item_data["actions"]
+
+			item_actions = []
 
 			# convert action ids into objects
-			for i, action_id in enumerate(item_actions):
-				item_actions[i] = self.game.action_generator.get_action_from_id(action_id)
+			for action_id in item_actions_ids:
+				item_actions.append(self.game.action_generator.get_action_from_id(action_id))
 
 			item_obj = items.melee_weapon(type=item_type, id_=id_, name=item_name, plural=item_plural, slot=item_slot, icon=item_plural, color=item_color, description=item_description, description_long=item_description_long,  weight=item_weight, volume=item_volume, buffs=item_buffs, multipliers=item_multipliers, base_damage=item_base_damage, actions=item_actions)
 

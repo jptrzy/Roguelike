@@ -28,6 +28,6 @@
 		"buffs" : {
 			"speed" : -20
 		},
-		"flags" : []
+		"flags" : ["DYNAMIC"]
 	}
 }

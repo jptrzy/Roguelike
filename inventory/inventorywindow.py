@@ -4,6 +4,19 @@ from window import windows
 from window import message
 import math
 
+class item_option(object):
+	def __init__(self, item, count):
+		self.item = item
+		self.count = count
+		
+		if self.count == 1:
+			self.string = self.item.name
+		else:
+			self.string = self.item.plural + " (" + str(self.count) + ")"
+		
+		self.start_row = 0
+		self.end_row = 0
+
 class inventorywindow(windows.popup):
 	def __init__(self, inventory, game):
 		"""
@@ -34,26 +47,13 @@ class inventorywindow(windows.popup):
 
 		self.activepopups = game.activepopups
 
-	class item_option(object):
-		def __init__(self, item, count):
-			self.item = item
-			self.count = count
-			
-			if self.count == 1:
-				self.string = self.item.name
-			else:
-				self.string = self.item.plural + " (" + str(self.count) + ")"
-			
-			self.start_row = 0
-			self.end_row = 0
-
 	def init(self):
 		self.run_inventory = True
 		while self.run_inventory:
 			self.process_input(self.open_instance())
+			self.close()
 
 		# finished with inventory
-		self.close()
 		terminal.refresh()
 
 	def process_input(self, item_option):
@@ -82,20 +82,28 @@ class inventorywindow(windows.popup):
 		except AttributeError:
 			pass
 
-		item_info = windows.pure_text_popup(info, game=self.game, title=title, exit=item_option.item.keybinds)
+		keybind_info = item_option.item.get_keybind_display_info(self.inventory) # dictionary: { 'keybind' : ["what it does", (color)] }
+
+		item_info = windows.pure_text_popup(info, game=self.game, title=title, exit=keybind_info)
 
 		# print keybinds for modifying the item
-		keybind_info = []
-		for keybind in item_option.item.keybinds:
-			keybind_info.append((keybind, (255,255,255)))
-			keybind_info.append((item_option.item.keybinds[keybind] + ' \\n', (200,200,200)))
+		keybind_display_info = []
+		for keybind in keybind_info:
+			keybind_display_info.append((keybind, keybind_info[keybind][1]))
+			keybind_display_info.append((keybind_info[keybind][0] + ' \\n', keybind_info[keybind][1]))
 
-		keybind_info_window = windows.text_popup_no_input(keybind_info, game=self.game, window_y=item_info.window.y, window_x=item_info.window.x+item_info.window.xlen)
+		keybind_info_window = windows.text_popup_no_input(keybind_display_info, game=self.game, window_y=item_info.window.y, window_x=item_info.window.x+item_info.window.xlen)
 
 		# get input from player
 		input_ = item_info.init()
+		if input_ is not None:
+			successful, message = item_option.item.process_modification(input_, self.inventory)
 
+		keybind_info_window.close()
 
+		if input_ is not None and not successful:
+			error_message = windows.pure_text_popup((message, [255,0,0]), game=self.game)
+			error_message.init()
 
 	def open_instance(self):
 		self.item_option_index = 0
@@ -104,6 +112,8 @@ class inventorywindow(windows.popup):
 		self.initialize_window()
 		self.prepare_window()
 		self.refresh_window()
+
+		self.activepopups.count += 1
 
 		terminal.refresh()
 
@@ -114,7 +124,6 @@ class inventorywindow(windows.popup):
 				self.get_next_char()
 
 		# finished response
-
 		if self.item_option_index is None or self.equipped_option_index is None:
 			return None
 		else:
@@ -126,9 +135,6 @@ class inventorywindow(windows.popup):
 				if self.no_equipped_items:
 					return None
 				return self.equipped_items_options[self.equipped_option_index]
-
-		# close this instance of the window
-		self.close()
 
 	def get_next_char(self):
 		char = terminal.read()
@@ -206,7 +212,7 @@ class inventorywindow(windows.popup):
 		item_options_unordered = []
 
 		for item in self.inventory.items:
-			item_options_unordered.append(self.item_option(item, self.inventory.items[item]))
+			item_options_unordered.append(item_option(item, self.inventory.items[item]))
 
 		## group items together by type
 		item_options_grouped = {}
@@ -249,7 +255,7 @@ class inventorywindow(windows.popup):
 			equipped_item = self.inventory.equipped_items[equipment_slot]
 			if equipped_item is not None:
 				message.s_add_message(message.convert_phrase_to_list(equipment_slot), self.row_width, self.add_new_equipped_item_row)
-				equipped_item_option = self.item_option(equipped_item, 1)
+				equipped_item_option = item_option(equipped_item, 1)
 				equipped_item_option.start_row = self.equipped_items_row_length
 				message.s_add_message(message.convert_phrase_to_list(equipped_item_option.item.name), self.row_width, self.add_new_equipped_item_row)
 				equipped_item_option.end_row = self.equipped_items_row_length - 1
@@ -385,7 +391,3 @@ class inventorywindow(windows.popup):
 
 		for i in range(scroll_bar_length):
 			self.window.put(start_scroll_bar_index+i+2+self.title_row_length, self.row_width*2+2, u'█', color=(100,100,100))
-
-	def close(self):
-		self.window.clear()
-		self.activepopups -= 1

@@ -238,17 +238,22 @@ class popup(object): # this class only handles display!
 		self.y = y
 		self.x = x
 		self.activepopups = activepopups
-		self.layer = activepopups + 200
+		self.layer = int(activepopups.count + 200)
 		self.window = window(self.ylen, self.xlen, self.y, self.x, self.layer, multi_layer=False)
 
 	def window_init(self):
 		self.window.clear()
 		self.window.fill(color=(230,0,0,0))
 		self.window.print_border()
+		self.activepopups.count += 1
 
-	def window_remove(self):
+	def close(self):
 		self.window.clear()
-		self.activepopups -= 1
+		self.activepopups.count -= 1
+
+class activepopups_handler(object):
+	def __init__(self):
+		self.count = 0
 
 class text_popup(popup):
 	def __init__(self, body_message, game, activepopups, title, w_ylen, w_xlen, window_y, window_x, row_width, max_rows, bottom_blank_rows):
@@ -401,10 +406,6 @@ class text_popup(popup):
 		self.print_body()
 		if self.title != None:
 			self.print_title()
-
-	def close(self):
-		self.window.clear()
-		self.activepopups -= 1
 
 class scroll_selection_popup(text_popup):
 	def __init__(self, title_message, selection_options, game=None, activepopups=0, w_ylen=0, w_xlen=0, window_y=None, window_x=None, row_width=30, max_rows=21):
@@ -622,7 +623,7 @@ class pure_text_popup(text_popup):
 					char = str(unichr(char))
 					if char in self.exit:
 						self.proceed = False
-						self.return_char = char	
+						self.return_reply = char	
 
 		self.refresh_window()
 		terminal.refresh()

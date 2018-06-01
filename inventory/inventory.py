@@ -41,7 +41,7 @@ class inventory(object):
 		# check if space is available and mob is able to carry
 		duplicate = False
 		for check_item in self.items:
-			if check_item.id_ == item.id_:
+			if check_item == item:
 				self.items[check_item] += 1
 				duplicate = True
 
@@ -68,6 +68,7 @@ class inventory(object):
 	def equip_item(self, item):
 		successful = True
 		message = None
+
 		if item.slot is None:
 			successful = False
 			message = "You cannot equip this item."
@@ -96,24 +97,37 @@ class inventory(object):
 		return successful, message
 
 	def unequip_item(self, item):
-		self.equipped_items[item.slot] = None
+		successful = True
+		message = None
 
-		# remove actions
-		for action in item.actions:
-			if action in self.mob.actions:
-				self.mob.actions.remove(action)
+		if self.equipped_items[item.slot] is not None:
+			if self.equipped_items[item.slot] == item:		
+				self.equipped_items[item.slot] = None
 
-		# remove buffs and multipliers to mob's stats
-		for buff_stat in item.buffs:
-			try:
-				self.stat_ids[buff_stat].buffs.remove(item.buffs[buff_stat])
-			except ValueError:
-				pass
-			self.stat_ids[buff_stat].recalc_max()
+				# remove actions
+				for action in item.actions:
+					if action in self.mob.actions:
+						self.mob.actions.remove(action)
 
-		for multiplier_stat in item.multipliers:
-			try:
-				self.stat_ids[multiplier_stat].multipliers.remove(item.multipliers[multiplier_stat])
-			except ValueError:
-				pass
-			self.stat_ids[buff_stat].recalc_max()
+				# remove buffs and multipliers to mob's stats
+				for buff_stat in item.buffs:
+					try:
+						self.stat_ids[buff_stat].buffs.remove(item.buffs[buff_stat])
+					except ValueError:
+						pass
+					self.stat_ids[buff_stat].recalc_max()
+
+				for multiplier_stat in item.multipliers:
+					try:
+						self.stat_ids[multiplier_stat].multipliers.remove(item.multipliers[multiplier_stat])
+					except ValueError:
+						pass
+					self.stat_ids[buff_stat].recalc_max()
+			else:
+				successful = False
+				message = "That item is not equipped."
+		else:
+			successful = False
+			message = "There is nothing to unequip in that slot."
+
+		return successful, message
