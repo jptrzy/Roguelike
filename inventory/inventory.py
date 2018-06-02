@@ -18,23 +18,6 @@ class inventory(object):
 		"primary weapon" : None
 		}
 
-		# lookup table for converting stat id to stat object
-		self.stat_ids = {
-			"stamina" : mob.stamina_stat,
-			"carry weight" : mob.carry_weight_stat,
-			"carry volume" : mob.carry_volume_stat,
-			"speed" : mob.speed_stat,
-			"sight range" : mob.sight_range_stat,
-			"sight border requirement" : mob.sight_border_requirement_stat,
-			"detect glow str" : mob.detect_glow_str_stat,
-			"detect glow range" : mob.detect_glow_range_stat,
-			"health" : mob.health_stat,
-			"mana" : mob.mana_stat,
-			"stamina" : mob.stamina_stat,
-			"hunger" : mob.hunger_stat,
-			"thirst" : mob.thirst_stat
-		}
-
 	def add_item(self, item):
 		successful = True
 		message = None
@@ -103,12 +86,12 @@ class inventory(object):
 
 				# add buffs and multipliers to mob's stats
 				for buff_stat in item.buffs:
-					self.stat_ids[buff_stat].buffs.append(item.buffs[buff_stat])
-					self.stat_ids[buff_stat].recalc_max()
+					self.mob.stat_ids[buff_stat].buffs.append(item.buffs[buff_stat])
+					self.mob.stat_ids[buff_stat].recalc_max()
 
 				for multiplier_stat in item.multipliers:
-					self.stat_ids[multiplier_stat].multipliers.append(item.multipliers[multiplier_stat])
-					self.stat_ids[buff_stat].recalc_max()
+					self.mob.stat_ids[multiplier_stat].multipliers.append(item.multipliers[multiplier_stat])
+					self.mob.stat_ids[buff_stat].recalc_max()
 
 		return successful, message
 
@@ -128,17 +111,17 @@ class inventory(object):
 				# remove buffs and multipliers to mob's stats
 				for buff_stat in item.buffs:
 					try:
-						self.stat_ids[buff_stat].buffs.remove(item.buffs[buff_stat])
+						self.mob.stat_ids[buff_stat].buffs.remove(item.buffs[buff_stat])
 					except ValueError:
 						pass
-					self.stat_ids[buff_stat].recalc_max()
+					self.mob.stat_ids[buff_stat].recalc_max()
 
 				for multiplier_stat in item.multipliers:
 					try:
-						self.stat_ids[multiplier_stat].multipliers.remove(item.multipliers[multiplier_stat])
+						self.mob.stat_ids[multiplier_stat].multipliers.remove(item.multipliers[multiplier_stat])
 					except ValueError:
 						pass
-					self.stat_ids[buff_stat].recalc_max()
+					self.mob.stat_ids[buff_stat].recalc_max()
 			else:
 				successful = False
 				message = "That item is not equipped."

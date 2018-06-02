@@ -91,15 +91,11 @@ class wizard_commands(object):
 				new_item = game.item_generator.create_item_from_id(request[1])
 				if new_item:
 					game.me.inventory.add_item(new_item)
-					successful, message = game.me.inventory.equip_item(new_item)
-					if not successful:
-						print message
-
-					print game.me.inventory.equipped_items
+					#successful, message = game.me.inventory.equip_item(new_item)
+					#if not successful:
+					#	print message
 			except IndexError:
 				pass
-
-			print game.me.inventory.items
 
 		if request[0] == "i":
 			game.inventorywindow.init()

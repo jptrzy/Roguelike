@@ -152,10 +152,11 @@ class mob_generator(object):
 		mob_mana = mob_data["mana"]
 		mob_sense_range = mob_data["sense range"]
 		mob_determined = mob_data["determined"]
-		mob_actions = mob_data["actions"]
+		mob_actions_data = mob_data["actions"]
 		# convert actions to objects
-		for i, action_id in enumerate(mob_actions):
-			mob_actions[i] = self.game.action_generator.get_action_from_id(action_id)
+		mob_actions = []
+		for i, action_id in enumerate(mob_actions_data):
+			mob_actions.append(self.game.action_generator.get_action_from_id(action_id))
 
 		# flags
 		mob_flags = mob_data["flags"]
@@ -234,6 +235,9 @@ class action_generator(object):
 		elif action_type == "melee attack":
 			action_damage = action_data["damage"]
 			action_obj = action.Melee_Attack(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, cost=action_cost, damage=action_damage)
+
+		elif action_type == "item action":
+			action_obj = action.Item_Action(id_=id_, name=action_name, cast_time=action_cast_time, recover_time=action_recover_time, cost=action_cost)
 
 		self.actions[id_] = action_obj
 		return action_obj

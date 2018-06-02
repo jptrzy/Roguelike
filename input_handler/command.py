@@ -58,7 +58,7 @@ class commands_handler(object):
 				else:
 					move_action = "walk"
 
-				game.me.do_action(move_action, (game.me, newy, newx), game)
+				game.me.do_action(move_action, (game.me, newy, newx), (game.timer.time,), game)
 			else:
 				game.message_panel.add_phrase('Cannot move there.', [255,0,0])
 				game.message_panel.print_messages()
@@ -118,7 +118,7 @@ class commands_handler(object):
 
 				attack_action = "smite"
 
-				game.me.do_action(attack_action, (game.me, attack_y, attack_x, game.all_mobs.mob_lib), game)
+				game.me.do_action(attack_action, (game.me, attack_y, attack_x, game.all_mobs.mob_lib), (game.timer.time,), game)
 
 		# other possibilities
 		elif uinput == terminal.TK_RESIZED:

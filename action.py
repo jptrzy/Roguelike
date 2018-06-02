@@ -39,6 +39,33 @@ class Action(object):
 
 		return stat_ids[stat_id] 
 
+class Item_Action(Action):
+	def __init__(self, id_, name, cast_time, recover_time, cost):
+		Action.__init__(self, id_, name, cast_time, recover_time, cost)
+
+	def prep(self, mob, current_time, item):
+		mob.next_update_time = current_time + float(self.cast_time) / (float(mob.speed) / 100) # make something to do with item weight here
+		mob.current_action = self
+		mob.update_stage = 1
+
+	def _calc_recover_time(self, speed, item):
+		return float(self.cast_time) / (float(speed) / 100) # make something to do with item weight here
+
+	def _calc_stamina_cost(self, mob, item, prompt_char):
+		return 10 # make something to do with item weight
+
+	def do(self, game, mob, item, prompt_char): # type can be "equip", "unequip", "drop", etc., anything that has to do with moving items around in the mob's inventory
+		if mob.stamina - self._calc_stamina_cost(mob, item) < 0:
+			return_message = "Not enough stamina!"
+			successful = False
+		else:
+			successful, return_message = item.do_modification(prompt_char, mob.inventory, mob, game)
+
+		mob.update_stage = 2
+		mob.next_update_time = game.timer.time + self._calc_recover_time(mob.speed, item, prompt_char)
+
+		return successful, return_message
+
 class Movement_Action(Action):
 	def __init__(self, id_, name, cast_time, recover_time, cost, range):
 		Action.__init__(self, id_, name, cast_time, recover_time, cost)

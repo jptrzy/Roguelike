@@ -15,13 +15,22 @@ import items
 from inventory import inventory
 
 class stat(object):
-	def __init__(self, max_amt, buffs=[], multipliers=[]):
+	def __init__(self, name, mob, max_amt, buffs=None, multipliers=None):
 		# initially start at max
+		self.name = name
+		self.mob = mob
 		self.value = max_amt
 		self.raw_max = max_amt
 		self.max = max_amt
-		self.buffs = buffs
-		self.multipliers = multipliers
+		if buffs is None:
+			self.buffs = []
+		else:
+			self.buffs = buffs
+		if multipliers is None:
+			self.multipliers = []
+		else:
+			self.multipliers = multipliers
+
 
 		self.recalc_max()
 
@@ -29,16 +38,16 @@ class stat(object):
 		self.max = self.raw_max
 
 		for buff in self.buffs:
-			self.max += buff 
+			self.max += buff
 
 		for multiplier in self.multipliers:
 			self.max = self.max * multiplier
 
-		self.value = min(self.value, self.max)
+		self.value = self.max
 
 class dynamic_stat(stat):
-	def __init__(self, max_amt, color_info, regen_rate=0.1, buffs=[], multipliers=[]):
-		stat.__init__(self, max_amt, buffs, multipliers)
+	def __init__(self, name, mob, max_amt, color_info, regen_rate=0.1, buffs=None, multipliers=None):
+		stat.__init__(self, name, mob, max_amt, buffs, multipliers)
 		self.color_info = color_info
 		self.regen_rate = regen_rate
 
@@ -77,24 +86,24 @@ class living(object):
 		self.emit = emit
 
 		# minimum amount of lighting required to see at sight range of mob
-		self.sight_border_requirement_stat = stat(sight_border_requirement)
+		self.sight_border_requirement_stat = stat("sight border requirement", self, sight_border_requirement)
 		# pseudo glow from mob based on how far they can see into the dark
-		self.detect_glow_str_stat = stat(detect_glow_str) 
+		self.detect_glow_str_stat = stat("detect glow str", self, detect_glow_str) 
 		# maximum distance where pseudo glow will still be considered
-		self.detect_glow_range_stat = stat(detect_glow_range)
+		self.detect_glow_range_stat = stat("detect glow range", self, detect_glow_range)
 
 		# stats
-		self.speed_stat = stat(speed)
-		self.sight_range_stat = stat(sight_range)
-		self.carry_weight_stat = stat(carry_weight)
-		self.carry_volume_stat = stat(carry_volume)
+		self.speed_stat = stat("speed", self, speed)
+		self.sight_range_stat = stat("sight range", self, sight_range)
+		self.carry_weight_stat = stat("carry weight", self, carry_weight)
+		self.carry_volume_stat = stat("carry volume", self, carry_volume)
 
 		# dynamic stats
-		self.health_stat = dynamic_stat(health, ([255, 0, 0], [255, 91, 91], [35, 0, 0]))
-		self.mana_stat = dynamic_stat(mana, ([43, 131, 255], [84, 175, 255], [0, 34, 89]))
-		self.stamina_stat = dynamic_stat(stamina, ([0, 175, 0], [73, 255, 73], [0, 50, 0]))
-		self.hunger_stat = dynamic_stat(hunger, ([255, 165, 0], [255, 199, 0], [33, 22, 0]))
-		self.thirst_stat = dynamic_stat(thirst, ([0, 216, 255], [142, 249, 255], [0, 55, 58]))
+		self.health_stat = dynamic_stat("health", self, health, ([255, 0, 0], [255, 91, 91], [35, 0, 0]))
+		self.mana_stat = dynamic_stat("mana", self, mana, ([43, 131, 255], [84, 175, 255], [0, 34, 89]))
+		self.stamina_stat = dynamic_stat("stamina", self, stamina, ([0, 175, 0], [73, 255, 73], [0, 50, 0]), regen_rate=100)
+		self.hunger_stat = dynamic_stat("hunger", self, hunger, ([255, 165, 0], [255, 199, 0], [33, 22, 0]))
+		self.thirst_stat = dynamic_stat("thirst", self, thirst, ([0, 216, 255], [142, 249, 255], [0, 55, 58]))
 
 		self.dynam_stats = [self.health_stat, self.mana_stat, self.stamina_stat, self.hunger_stat, self.thirst_stat]
 
@@ -105,6 +114,23 @@ class living(object):
 			for n in range(3):
 				for i in range(3):
 					dynam_stat.color_info[n][i] = int(0.7*dynam_stat.color_info[n][i])
+
+		# lookup table for converting stat id to stat object
+		self.stat_ids = {
+			"stamina" : self.stamina_stat,
+			"carry weight" : self.carry_weight_stat,
+			"carry volume" : self.carry_volume_stat,
+			"speed" : self.speed_stat,
+			"sight range" : self.sight_range_stat,
+			"sight border requirement" : self.sight_border_requirement_stat,
+			"detect glow str" : self.detect_glow_str_stat,
+			"detect glow range" : self.detect_glow_range_stat,
+			"health" : self.health_stat,
+			"mana" : self.mana_stat,
+			"stamina" : self.stamina_stat,
+			"hunger" : self.hunger_stat,
+			"thirst" : self.thirst_stat
+		}
 
 		# inventory
 		self.inventory = inventory.inventory(self)
@@ -217,7 +243,7 @@ class living(object):
 
 	def get_sight_requirement(self, distance_from_mob):
 		# requirement to see
-		return float(self.sight_border_requirement/self.sight_range)*distance_from_mob
+		return float(self.sight_border_requirement)/self.sight_range*distance_from_mob
 
 	def get_detect_glow_str(self, distance_from_mob):
 		if distance_from_mob > self.detect_glow_range:
@@ -228,8 +254,8 @@ class mob(living):
 	def __init__(self, id_, name, plural, description, description_long, health, speed, carry_weight, carry_volume,sight_range, stamina, hunger, thirst, mana, sense_range, determined, pathfinding, hostile, ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range, actions):
 		living.__init__(self, id_, name, plural, description, description_long, health, speed, carry_weight, carry_volume, sight_range, stamina, hunger, thirst, mana, ethereal, tile, aura, emit, sight_border_requirement, detect_glow_str, detect_glow_range, actions)
 
-		self.sense_range = stat(sense_range)
-		self.determined = stat(determined) # max number of checks in pathfinding
+		self.sense_range = stat("sense range", self, sense_range)
+		self.determined = stat("determined", self, determined) # max number of checks in pathfinding
 		self.pathfinding = pathfinding
 		self.hostile = hostile
 

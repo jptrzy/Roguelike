@@ -62,5 +62,17 @@
 		},
 		"damage" : 20,
 		"flags" : []
+	},
+
+	"item_action" : {
+		"type" : "item action",
+		"name" : "item action",
+		"description" : "placeholder action for modifying an item",
+		"cast_time" : 10,
+		"recover_time" : 10,
+		"cost" : {
+			"stamina" : 0
+		},
+		"flags" : []
 	}
 }

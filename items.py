@@ -22,10 +22,9 @@ class item(object):
 
 		self.keybinds['d'] = ["drop", (255,255,255)]
 
-		self.keybinds['e'] = ["equip", (100,100,100)]
-		self.keybinds['u'] = ["unequip", (100,100,100)]
-
 		if self.slot is not None:
+			self.keybinds['e'] = ["equip", (100,100,100)]
+			self.keybinds['u'] = ["unequip", (100,100,100)]
 			if inventory.equipped_items[self.slot] is None:
 				self.keybinds['e'][1] = (255,255,255)
 			else:
@@ -35,7 +34,10 @@ class item(object):
 
 		return self.keybinds
 
-	def process_modification(self, prompt_char, inventory, game):
+	def process_modification(self, prompt_char, inventory, game): # only works for the player character
+		game.me.do_action("item_action", (game.me, self, prompt_char), (game.timer.time, self), game)
+
+	def do_modification(self, prompt_char, inventory, mob, game):
 		successful = True
 		message = None
 
@@ -54,7 +56,6 @@ class item(object):
 
 		return successful, message
 
-
 class melee_weapon(item):
 	def __init__(self, type, id_, name, plural, slot, icon, color, description, description_long,  weight, volume, buffs, multipliers, base_damage, actions):
 		item.__init__(self, type, id_, name, plural, slot, icon, color, description, description_long, weight, volume, buffs, multipliers)
@@ -63,6 +64,4 @@ class melee_weapon(item):
 		self.actions = actions
 
 	def process_modification(self, prompt_char, inventory, game):
-		successful, message = super(melee_weapon, self).process_modification(prompt_char, inventory, game)
-
-		return successful, message
+		super(melee_weapon, self).process_modification(prompt_char, inventory, game)
