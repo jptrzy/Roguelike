@@ -150,7 +150,8 @@ class info_panel(object):
 
 	def prepare_tile_info(self):
 		for print_layer in self.print_info:
-			print_message = [(print_layer+":", (255,255,255))]
+			print_message = [(print_layer+":"+" \\n", (255,255,255))]
+			i = 1
 			for tile_id in self.print_info[print_layer]:
 				tile = self.print_info[print_layer][tile_id][0]
 				tile_count = self.print_info[print_layer][tile_id][1]
@@ -160,6 +161,11 @@ class info_panel(object):
 					print_message.append(("("+str(tile_count)+")", (255,255,255)))
 				else:
 					print_message.append((tile.name, (255,255,255)))
+
+				if i != len(self.print_info[print_layer]):
+					print_message.append(("\\n", (0,0,0)))
+
+				i += 1
 
 			s_add_message(custom_convert_phrase_to_list(print_message), self.window.xlen-1, self.add_new_row)
 
@@ -180,6 +186,7 @@ class info_panel(object):
 
 	def print_expanded_tile_info(self):
 		print_message = []
+		i = 1
 		for print_layer in self.print_info:
 			print_message.append((print_layer+": \\n", (255,255,255)))
 			for tile_id in self.print_info[print_layer]:
@@ -195,7 +202,10 @@ class info_panel(object):
 				if tile.description_long is not None:
 					print_message.append((tile.description_long, (100,100,100)))
 
-				print_message.append(("\\n", (255,255,255)))
+				if i != len(self.print_info):
+					print_message.append(("\\n", (255,255,255)))
+
+			i += 1
 
 		expanded_tile_info = pure_text_popup(print_message, game=self.game, title="Enter/Esc to close.", exit=None)
 		expanded_tile_info.init()
